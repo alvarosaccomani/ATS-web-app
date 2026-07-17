@@ -1,1 +1,314 @@
-<p>home works!</p>
+<div class="bg-white text-dark min-vh-screen">
+  
+  <nav class="navbar navbar-expand-md navbar-light bg-white sticky-top border-b shadow-sm py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center cursor-pointer" href="#ecosistema">
+        <svg class="me-2" width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,15 15,75 85,75" stroke="#0A2540" stroke-width="6" stroke-linejoin="round"/>
+          <circle cx="50" cy="15" r="5" fill="#00E5FF"/>
+          <circle cx="15" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="85" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="50" cy="55" r="14" fill="#0A2540"/>
+        </svg>
+        <div class="d-flex flex-column">
+          <span class="fw-bold text-dark mb-0 lh-1">ATS</span>
+          <small class="text-uppercase text-muted tracking-widest" style="font-size: 0.65rem; letter-spacing: 1px;">Core Central</small>
+        </div>
+      </a>
+      
+      <div class="collapse navbar-collapse justify-content-center">
+        <ul class="navbar-nav gap-3 small fw-semibold">
+          <li class="nav-item"><a class="nav-link text-secondary text-dark-hover" href="#ecosistema">Ecosistema</a></li>
+          <li class="nav-item"><a class="nav-link text-secondary text-dark-hover" href="#modulos">Módulos</a></li>
+          <li class="nav-item"><a class="nav-link text-secondary text-dark-hover" href="#sinergia">Casos de Uso</a></li>
+          <li class="nav-item"><a class="nav-link text-secondary text-dark-hover" href="#arquitectura">Core Técnico</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <a href="#contacto" class="btn text-white px-4 fw-semibold" style="background-color: #0A2540; border-radius: 8px;">
+          Iniciar Suite
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <section id="ecosistema" class="py-5 position-relative border-bottom bg-light bg-opacity-25">
+    <div class="container py-5">
+      <div class="row align-items-center g-5">
+        
+        <div class="col-12 col-lg-5 text-center text-lg-start">
+          <span class="badge text-dark bg-secondary bg-opacity-10 rounded-pill px-3 py-2 mb-4 small fw-semibold">
+            Ecosistema Integrado B2B2C
+          </span>
+          <h1 class="display-5 fw-extrabold text-dark tracking-tight mb-4" style="color: #0A2540 !important;">
+            Unifica tu Operación.<br>
+            <span class="text-gradient">Centraliza tu Éxito.</span>
+          </h1>
+          <p class="lead text-muted mb-4 fs-6">
+            La suite de gestión integral que conecta tus módulos, tus datos y tus equipos en un solo núcleo inteligente. Sincronización transparente y escalabilidad nativa.
+          </p>
+          <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
+            <a href="#modulos" class="btn text-white px-4 py-3 fw-semibold shadow-sm" style="background-color: #0A2540; border-radius: 10px;">
+              Descubrir la Suite
+            </a>
+            <a href="#arquitectura" class="btn btn-outline-secondary px-4 py-3 fw-semibold bg-white" style="border-radius: 10px;">
+              Ver Especificaciones
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-7 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 450px;">
+          <div class="radial-blur-bg"></div>
+          <svg class="w-100 h-auto svg-interactive overflow-visible" style="max-width: 500px;" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            
+            <g class="animate-pulse opacity-50" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="4 4">
+              <line x1="200" y1="200" x2="80" y2="120" />
+              <line x1="200" y1="200" x2="320" y2="120" />
+              <line x1="200" y1="200" x2="320" y2="280" />
+              <line x1="200" y1="200" x2="80" y2="280" />
+              <line x1="200" y1="200" x2="200" y2="60" />
+            </g>
+
+            <polygon points="200,90 110,250 290,250" stroke="#0A2540" stroke-width="3" stroke-linejoin="round" class="opacity-25" />
+            
+            <g class="cursor-pointer node-group" (click)="setActiveModule('Central')">
+              <circle cx="200" cy="200" r="32" fill="#0A2540" />
+              <circle cx="200" cy="200" r="24" fill="none" stroke="#00E5FF" stroke-width="2" class="pulse-ring" />
+              <text x="200" y="204" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">ATS</text>
+            </g>
+
+            <g class="cursor-pointer node-group" (click)="setActiveModule('GUVA')">
+              <circle cx="80" cy="120" r="22" fill="#FFFFFF" stroke="#0A2540" stroke-width="2"/>
+              <text x="80" y="124" fill="#0A2540" font-size="9" font-weight="bold" text-anchor="middle">GUVA</text>
+            </g>
+
+            <g class="cursor-pointer node-group" (click)="setActiveModule('Community')">
+              <circle cx="320" cy="120" r="22" fill="#FFFFFF" stroke="#0A2540" stroke-width="2"/>
+              <text x="320" y="124" fill="#0A2540" font-size="8" font-weight="bold" text-anchor="middle">COMM</text>
+            </g>
+
+            <g class="cursor-pointer node-group" (click)="setActiveModule('Market')">
+              <circle cx="320" cy="280" r="22" fill="#FFFFFF" stroke="#0A2540" stroke-width="2"/>
+              <text x="320" y="284" fill="#0A2540" font-size="8" font-weight="bold" text-anchor="middle">MARKET</text>
+            </g>
+
+            <g class="cursor-pointer node-group" (click)="setActiveModule('Works')">
+              <circle cx="80" cy="280" r="22" fill="#FFFFFF" stroke="#0A2540" stroke-width="2"/>
+              <text x="80" y="284" fill="#0A2540" font-size="8" font-weight="bold" text-anchor="middle">WORKS</text>
+            </g>
+
+            <g class="cursor-pointer node-group" (click)="setActiveModule('Management')">
+              <circle cx="200" cy="60" r="22" fill="#FFFFFF" stroke="#0A2540" stroke-width="2"/>
+              <text x="200" y="64" fill="#0A2540" font-size="8" font-weight="bold" text-anchor="middle">MGMT</text>
+            </g>
+          </svg>
+
+          <div class="mt-4 px-3 py-2 text-white small rounded shadow d-flex align-items-center gap-2 animate-fade-in" style="background-color: #0A2540; border-radius: 10px;">
+            <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
+            <span>Módulo Activo: <strong>{{ activeModuleTitle }}</strong></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5 container border-bottom">
+    <div class="text-center max-w-3xl mx-auto py-4 mb-5">
+      <h2 class="fw-bold tracking-tight mb-3" style="color: #0A2540;">La Fuerza de un Núcleo Compartido</h2>
+      <p class="text-muted">No vendemos aplicaciones aisladas; estructuramos un ecosistema donde cada fragmento de software potencia al siguiente.</p>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="card h-100 p-4 bg-light border-0 rounded-4 feature-card">
+          <div class="badge-num bg-white text-dark shadow-sm fw-bold d-flex align-items-center justify-content-center mb-4">01</div>
+          <h3 class="h5 fw-bold mb-2" style="color: #0A2540;">Sincronización Total</h3>
+          <p class="small text-muted lh-base mb-0">Olvídate de sincronizaciones pesadas por lotes. Los flujos transaccionales impactan en tiempo real entre tus aplicaciones a través del core.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100 p-4 bg-light border-0 rounded-4 feature-card">
+          <div class="badge-num bg-white text-dark shadow-sm fw-bold d-flex align-items-center justify-content-center mb-4">02</div>
+          <h3 class="h5 fw-bold mb-2" style="color: #0A2540;">Escalabilidad Modular</h3>
+          <p class="small text-muted lh-base mb-0">Agrega nuevos módulos como ATS Community sin alterar las bases establecidas de tus otros servicios o aplicaciones.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100 p-4 bg-light border-0 rounded-4 feature-card">
+          <div class="badge-num bg-white text-dark shadow-sm fw-bold d-flex align-items-center justify-content-center mb-4">03</div>
+          <h3 class="h5 fw-bold mb-2" style="color: #0A2540;">Identidad Única</h3>
+          <p class="small text-muted lh-base mb-0">Autenticación invisible. El mismo ID de usuario mapeado de forma federada te da control completo en toda la suite.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modulos" class="py-5 bg-light bg-opacity-50 border-bottom">
+    <div class="container py-4">
+      <div class="mb-5">
+        <h2 class="fw-bold tracking-tight mb-2" style="color: #0A2540;">Componentes de la Suite</h2>
+        <p class="text-muted">Módulos especializados con objetivos independientes que comparten el mismo ADN de ingeniería.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-lg-6" *ngFor="let mod of suiteModules">
+          <div class="card h-100 p-4 bg-white border rounded-4 shadow-sm module-card"
+               [class.active-module-card]="activeModule === mod.id">
+            <div class="card-body p-0 d-flex flex-column h-100 justify-content-between">
+              <div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <span class="text-uppercase text-muted fw-bold small tracking-wider" style="font-size: 0.75rem;">{{mod.type}}</span>
+                  <span class="badge rounded-pill small px-2.5 py-1" [ngClass]="mod.badgeClass">{{mod.monetization}}</span>
+                </div>
+                <h3 class="h4 fw-bold mb-3" style="color: #0A2540;">{{mod.name}}</h3>
+                <p class="small text-muted lh-relaxed mb-4">{{mod.description}}</p>
+                
+                <ul class="list-unstyled mb-4">
+                  <li *ngFor="let feat of mod.features" class="small text-secondary mb-2 d-flex align-items-center">
+                    <span class="dot-accent me-2"></span> {{feat}}
+                  </li>
+                </ul>
+              </div>
+              
+              <div class="pt-3 border-top d-flex align-items-center justify-content-between">
+                <span class="font-monospace text-muted small" style="font-size: 0.75rem;">Stack: Angular + Node + PG</span>
+                <button class="btn btn-link p-0 fw-bold small text-decoration-none transition-colors align-center" style="color: #0A2540;">
+                  Explorar módulo &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sinergia" class="py-5 container border-bottom">
+    <div class="text-center max-w-3xl mx-auto py-4 mb-5">
+      <h2 class="fw-bold tracking-tight mb-3" style="color: #0A2540;">Sinergias Cruzadas en Tiempo Real</h2>
+      <p class="text-muted">Mira cómo interactúan los flujos de negocio a través de nuestro core centralizado.</p>
+    </div>
+
+    <div class="card border-0 rounded-4 p-4 p-md-5 text-white overflow-hidden position-relative" style="background-color: #0A2540;">
+      <div class="watermark-svg">
+        <svg width="350" height="350" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,15 15,75 85,75" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.08"/>
+        </svg>
+      </div>
+
+      <div class="position-relative z-1">
+        <h3 class="h5 fw-bold mb-5 text-info text-uppercase tracking-wide">Ejemplo de flujo: Resolución de Incidencias y Logística</h3>
+        
+        <div class="row g-4">
+          <div class="col-12 col-md-3">
+            <div class="font-monospace text-info small mb-1">PASO 01</div>
+            <h4 class="h6 fw-bold mb-2">ATS Community</h4>
+            <p class="small text-light opacity-75 mb-0">Un consorcista reporta un reclamo de prioridad alta en la app de su barrio cerrado.</p>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="font-monospace text-info small mb-1">PASO 02</div>
+            <h4 class="h6 fw-bold mb-2">ATS Core Central</h4>
+            <p class="small text-light opacity-75 mb-0">El hub valida el token, audita permisos y despacha el evento de integración de forma inmediata.</p>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="font-monospace text-info small mb-1">PASO 03</div>
+            <h4 class="h6 fw-bold mb-2">ATS Works</h4>
+            <p class="small text-light opacity-75 mb-0">Se genera de forma automática una orden con planillas de mantenimiento y operarios asignados.</p>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="font-monospace text-info small mb-1">PASO 04</div>
+            <h4 class="h6 fw-bold mb-2">ATS Market</h4>
+            <p class="small text-light opacity-75 mb-0">Los materiales e insumos de reparación utilizados se descuentan directamente del stock del depósito.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="arquitectura" class="py-5 text-white" style="background-color: #0F172A;">
+    <div class="container py-4">
+      <div class="row g-5 align-items-center">
+        <div class="col-12 col-lg-6">
+          <span class="font-monospace text-info text-uppercase tracking-wider small mb-2 d-block">// Arquitectura Limpia</span>
+          <h2 class="fw-bold tracking-tight mb-4 text-white">Diseñado bajo DDD, pensado para la estabilidad</h2>
+          <p class="text-secondary small lh-relaxed mb-4" style="color: #94A3B8 !important;">
+            Cada microservicio e interfaz se rige bajo los principios del Diseño Guiado por el Dominio (DDD), garantizando el desacoplamiento de la base de datos a través de repositorios limpios y abstracciones eficientes en TypeScript.
+          </p>
+          
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-start gap-3">
+              <div class="badge bg-secondary bg-opacity-20 text-info font-monospace rounded small px-2 py-1">✓</div>
+              <div>
+                <h4 class="h6 fw-semibold text-white mb-1">Identidad Federada Segura (Silent SSO)</h4>
+                <p class="small mb-0" style="color: #94A3B8; font-size:0.85rem;">Inicio de sesión único por medio de cookies seguras que evitan redirecciones molestas externas.</p>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="badge bg-secondary bg-opacity-20 text-info font-monospace rounded small px-2 py-1">✓</div>
+              <div>
+                <h4 class="h6 fw-semibold text-white mb-1">Lazy Creation de Usuarios</h4>
+                <p class="small mb-0" style="color: #94A3B8; font-size:0.85rem;">Creación perezosa mediante middleware en Sequelize para inicializar registros locales solo cuando es necesario.</p>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="badge bg-secondary bg-opacity-20 text-info font-monospace rounded small px-2 py-1">✓</div>
+              <div>
+                <h4 class="h6 fw-semibold text-white mb-1">PostgreSQL unificado con PGVector</h4>
+                <p class="small mb-0" style="color: #94A3B8; font-size:0.85rem;">Esquemas aislados y organizados compartiendo tipos nativos UUID e indexación optimizada.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="p-4 rounded-4 border shadow-lg font-monospace text-light" style="background-color: #030712; border-color: #1F2937 !important; font-size: 0.75rem;">
+            <div class="d-flex gap-1.5 border-bottom pb-2 mb-3" style="border-color: #1F2937 !important;">
+              <span class="rounded-circle bg-danger bg-opacity-75 d-inline-block" style="width:10px; height:10px;"></span>
+              <span class="rounded-circle bg-warning bg-opacity-75 d-inline-block" style="width:10px; height:10px;"></span>
+              <span class="rounded-circle bg-success bg-opacity-75 d-inline-block" style="width:10px; height:10px;"></span>
+              <span class="text-muted small ms-2" style="font-size: 10px;">shared-kernel / sso-middleware.ts</span>
+            </div>
+            <pre class="mb-0 overflow-x-auto text-start"><code class="text-success">import {{ '{' }} Request, Response, NextFunction {{ '}' }} from 'express';</code>
+<code>import {{ '{' }} Sequelize {{ '}' }} from 'sequelize';</code>
+<span class="text-muted">// Lazy Creation & Token Audit Middleware</span>
+<code>export const authSilentSSO = async (req: Request, res: Response) => {{ '{' }}</code>
+<code>  const {{ '{' }} usr_Uuid, email {{ '}' }} = req.userTokenPayload;</code>
+<code>  const userExists = await LocalUser.findByPk(usr_Uuid);</code>
+<code>  if (!userExists) {{ '{' }}</code>
+<code>    <span class="text-info">await LocalUser.create({{ '{' }} usr_Uuid, email {{ '}' }});</span></code>
+<code>    console.log(\`[LazyCreation] User initialized: \${{ '{' }}usr_Uuid{{ '}' }}\`);</code>
+<code>  {{ '}' }}</code>
+<code>  return next();</code>
+<code>{{ '}' }};</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto" class="py-5 bg-white">
+    <div class="container text-center py-5 max-w-xl">
+      <h2 class="fw-extrabold text-dark mb-3" style="color: #0A2540 !important;">Despliega el poder de ATS Suite hoy mismo</h2>
+      <p class="text-muted mb-4 mx-auto small" style="max-w: 500px;">Prueba el ecosistema completo y descubre cómo la unificación de software impulsa radicalmente tus procesos técnicos y comerciales.</p>
+      
+      <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2 mx-auto" style="max-w: 450px;">
+        <input type="email" placeholder="Introduce tu email de empresa" class="form-control px-3 py-2.5 rounded-3 text-sm focus-ring" style="font-size:0.85rem;" />
+        <button class="btn text-white px-4 py-2.5 fw-semibold rounded-3 text-nowrap w-100 w-sm-auto" style="background-color: #0A2540; font-size:0.85rem;">
+          Hablar con Especialista
+        </button>
+      </div>
+    </div>
+
+    <div class="container mt-5 pt-4 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center small text-muted gap-3" style="font-size: 0.75rem;">
+      <p class="mb-0">&copy; 2026 ATS Software Suite. Todos los derechos reservados.</p>
+      <div class="d-flex gap-4">
+        <a href="#ecosistema" class="text-muted text-decoration-none">Términos</a>
+        <a href="#ecosistema" class="text-muted text-decoration-none">Privacidad</a>
+        <a href="#ecosistema" class="text-muted text-decoration-none">Infraestructura</a>
+      </div>
+    </div>
+  </section>
+
+</div>

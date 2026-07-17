@@ -1,0 +1,106 @@
+/* Texto degradado en el Hero */
+.text-gradient {
+  background: linear-gradient(90deg, #0A2540 0%, #00E5FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Efectos hover para los enlaces de navegación */
+.text-dark-hover:hover {
+  color: #0A2540 !important;
+  transition: color 0.2s ease-in-out;
+}
+
+/* Blur radial sutil detrás del mapa SVG */
+.radial-blur-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* --- INTERACTIVIDAD DEL MAPA SVG --- */
+.svg-interactive .node-group {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.svg-interactive .node-group circle,
+.svg-interactive .node-group text {
+  transition: all 0.25s ease-in-out;
+}
+
+/* Hover de nodos del mapa mental */
+.svg-interactive .node-group:hover {
+  transform: scale(1.06);
+  transform-origin: center; /* Nota: Requiere Angular o ids si queres centrar individualmente de forma perfecta, pero escala bien */
+}
+
+.svg-interactive .node-group:hover circle {
+  stroke: #00E5FF !important;
+  stroke-width: 3px;
+}
+
+.svg-interactive .node-group:hover text {
+  fill: #00E5FF !important;
+}
+
+/* Efecto de anillo de pulso en el Core Central */
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.pulse-ring {
+  animation: ping 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: 200px 200px;
+}
+
+/* Número de índice en las tarjetas de beneficios */
+.badge-num {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+/* Dinamismo al interactuar con las tarjetas del grid de beneficios */
+.feature-card:hover .badge-num {
+  background-color: #0A2540 !important;
+  color: #FFFFFF !important;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Ajustes de las tarjetas de la galería */
+.module-card {
+  transition: all 0.25s ease-in-out;
+}
+.active-module-card {
+  border-color: rgba(0, 229, 255, 0.5) !important;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 229, 255, 0.1) !important;
+}
+
+/* Punto indicador de features internas */
+.dot-accent {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #00E5FF;
+}
+
+/* Marca de agua en el timeline de flujo */
+.watermark-svg {
+  position: absolute;
+  right: -50px;
+  bottom: -50px;
+  pointer-events: none;
+}
+
+/* Animación de entrada de feedback */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
