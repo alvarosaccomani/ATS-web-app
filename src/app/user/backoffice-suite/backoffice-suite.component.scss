@@ -1,0 +1,44 @@
+/* Tipografía auxiliar */
+.style-title {
+  font-size: 0.65rem; 
+  letter-spacing: 1.5px;
+}
+
+/* Hover de links limpios en Bootstrap */
+.text-dark-hover:hover {
+  color: #0A2540 !important;
+  background-color: rgba(15, 23, 42, 0.04);
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Efecto suave para las tarjetas del App Launcher */
+.transition-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.transition-card:hover:not(.opacity-75) {
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2rem rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Estado bloqueado para apps no suscritas */
+.bg-light-disable {
+  background-color: #F8FAFC;
+  border: 1px dashed #E2E8F0 !important;
+}
+
+/* Botón con el acento celeste de la marca */
+.hover-btn-cyan:hover {
+  background-color: #00E5FF !important;
+  color: #0A2540 !important;
+  border-color: #00E5FF !important;
+}
+
+/* Botón de ancho automático basado en contenido */
+.w-fit {
+  width: fit-content;
+}
+
+/* Terminal de Logs internos */
+.text-cyan { color: #00E5FF; }
