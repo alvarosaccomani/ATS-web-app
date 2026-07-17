@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Tailwind tracking equivalents */
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+
+/* Tailwind line-height equivalents */
+.lh-relaxed {
+  line-height: 1.625;
+}
