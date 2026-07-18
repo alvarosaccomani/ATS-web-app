@@ -2,6 +2,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { getCookie, setCookie, deleteCookie, getSharedDomain } from '../utils/cookie-utils';
 
 export interface UserSession {
   usr_uuid: string;
@@ -29,9 +30,11 @@ export class AuthService {
         if (response.success && response.data) {
           const user = response.data.user || response.data;
           const token = response.data.token;
+          const domain = getSharedDomain();
           
           if (token) {
-            localStorage.setItem('ats_token', token);
+            // Guardamos el token en una cookie por 7 días con el dominio compartido
+            setCookie('ats_token', token, 7, domain);
           }
           
           const sessionUser: UserSession = {
@@ -42,7 +45,8 @@ export class AuthService {
             usr_sysadmin: !!user.usr_sysadmin
           };
           
-          localStorage.setItem('ats_user', JSON.stringify(sessionUser));
+          // Guardamos el perfil en formato JSON codificado en una cookie por 7 días
+          setCookie('ats_user', encodeURIComponent(JSON.stringify(sessionUser)), 7, domain);
           this.currentUser.set(sessionUser);
         }
       })
@@ -74,8 +78,9 @@ export class AuthService {
   }
 
   public logout(): void {
-    localStorage.removeItem('ats_token');
-    localStorage.removeItem('ats_user');
+    const domain = getSharedDomain();
+    deleteCookie('ats_token', domain);
+    deleteCookie('ats_user', domain);
     this.currentUser.set(null);
   }
 
@@ -84,10 +89,10 @@ export class AuthService {
   }
 
   private loadSessionFromStorage(): void {
-    const userStr = localStorage.getItem('ats_user');
-    if (userStr) {
+    const userCookie = getCookie('ats_user');
+    if (userCookie) {
       try {
-        const user = JSON.parse(userStr);
+        const user = JSON.parse(decodeURIComponent(userCookie));
         this.currentUser.set(user);
       } catch (e) {
         this.logout();
