@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '../core/guard/auth-guard';
+import { authGuard } from '../core/guards/auth-guard';
 
 import { UserLayoutComponent } from './user-layout/user-layout.component';
 import { BackofficeSuiteComponent } from './backoffice-suite/backoffice-suite.component';
