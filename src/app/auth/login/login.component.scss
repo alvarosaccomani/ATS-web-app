@@ -1,0 +1,46 @@
+/* Estilo de fuentes */
+.font-sans {
+  font-family: 'Inter', 'Montserrat', sans-serif;
+}
+
+/* Tamaño de texto general */
+.text-sm {
+  font-size: 0.85rem;
+}
+
+/* Transiciones personalizadas para inputs */
+.form-control {
+  border-color: #E2E8F0;
+  transition: all 0.2s ease-in-out;
+  
+  &:focus {
+    border-color: rgba(0, 229, 255, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(0, 229, 255, 0.15);
+    outline: 0;
+  }
+}
+
+/* Botón con el acento celeste de la marca */
+.hover-btn-cyan {
+  transition: all 0.25s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    background-color: #00E5FF !important;
+    color: #0A2540 !important;
+    border-color: #00E5FF !important;
+  }
+}
+
+/* Link secundario con efecto hover */
+.link-muted:hover {
+  color: #0A2540 !important;
+}
+
+/* Animación de entrada suave para mensajes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

@@ -1,1 +1,74 @@
-<p>login works!</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100 p-3 bg-light bg-opacity-25" style="background-color: #F8FAFC;">
+  
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden w-100" style="max-width: 480px;">
+    
+    <div class="card-body p-4 p-md-5">
+      
+      <!-- Cabecera de la marca -->
+      <div class="text-center mb-4">
+        <svg class="mb-3 cursor-pointer" routerLink="/public/home" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,15 15,75 85,75" stroke="#0A2540" stroke-width="6" stroke-linejoin="round"/>
+          <circle cx="50" cy="15" r="5" fill="#00E5FF"/>
+          <circle cx="15" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="85" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="50" cy="55" r="14" fill="#0A2540"/>
+        </svg>
+        <h1 class="h3 fw-extrabold mb-1" style="color: #0A2540;">Accedé a tu Cuenta Única</h1>
+        <p class="text-muted small">Ingresá tus credenciales de la suite ATS.</p>
+      </div>
+
+      <!-- Alertas de estado -->
+      <div *ngIf="errorMessage" class="alert alert-danger rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
+
+      <!-- Formulario Reactivo -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <div class="mb-3">
+          <label for="usr_user" class="form-label small fw-bold text-dark">Usuario o Email</label>
+          <input type="text" id="usr_user" formControlName="usr_user"
+                 class="form-control px-3 py-2 rounded-3 text-sm"
+                 [ngClass]="{ 'is-invalid': submitted && loginForm.get('usr_user')?.errors }"
+                 placeholder="Ej: marianorodriguez o correo@ejemplo.com"/>
+          <div *ngIf="submitted && loginForm.get('usr_user')?.errors?.['required']" class="invalid-feedback small">
+            El usuario o email es obligatorio.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="usr_password" class="form-label small fw-bold text-dark mb-0">Contraseña</label>
+            <a href="#" class="small text-decoration-none text-muted" style="font-size: 0.8rem;">¿Olvidaste tu contraseña?</a>
+          </div>
+          <input type="password" id="usr_password" formControlName="usr_password"
+                 class="form-control px-3 py-2 rounded-3 text-sm"
+                 [ngClass]="{ 'is-invalid': submitted && loginForm.get('usr_password')?.errors }"
+                 placeholder="Ingresá tu contraseña"/>
+          <div *ngIf="submitted && loginForm.get('usr_password')?.errors?.['required']" class="invalid-feedback small">
+            La contraseña es obligatoria.
+          </div>
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" [disabled]="loading" class="btn text-white w-100 py-2.5 fw-semibold transition-all rounded-3 shadow hover-btn-cyan d-flex align-items-center justify-content-center gap-2" style="background-color: #0A2540;">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{ loading ? 'Iniciando sesión...' : 'Ingresar' }}
+        </button>
+
+      </form>
+
+      <!-- Pie del formulario -->
+      <div class="text-center mt-4 pt-2 border-top border-light">
+        <p class="small text-muted mb-0">
+          ¿No tenés cuenta? 
+          <a routerLink="/auth/register" class="fw-semibold text-decoration-none transition-colors link-muted" style="color: #64748B;">
+            Registrate gratis
+          </a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
