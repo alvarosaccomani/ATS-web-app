@@ -16,7 +16,8 @@
         "@schematics/angular:service": {
           "type": "service"
         },
-        "@schematics/angular:guard": {}
+        "@schematics/angular:guard": {},
+        "@schematics/angular:interceptor": {}
       },
       "root": "",
       "sourceRoot": "src",
