@@ -25,10 +25,46 @@
         </ul>
       </div>
 
-      <div>
-        <a href="#contacto" class="btn text-white px-4 fw-semibold" style="background-color: #0A2540; border-radius: 8px;">
-          Iniciar Suite
-        </a>
+      <div class="d-flex align-items-center gap-2">
+        <!-- Si el usuario no está logueado -->
+        <ng-container *ngIf="!_authService.currentUser()">
+          <a routerLink="/auth/login" class="btn text-secondary fw-semibold px-3 text-dark-hover" style="font-size: 0.9rem;">
+            Ingresar
+          </a>
+          <a routerLink="/auth/register" class="btn text-white px-4 fw-semibold hover-btn-cyan transition-all" style="background-color: #0A2540; border-radius: 8px; font-size: 0.9rem;">
+            Registrarse
+          </a>
+        </ng-container>
+
+        <!-- Si el usuario está logueado -->
+        <div *ngIf="_authService.currentUser() as user" class="dropdown" [class.show]="isDropdownOpen">
+          <button class="btn border-0 d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light bg-opacity-75 dropdown-toggle no-caret" type="button" id="userMenuButton" (click)="toggleDropdown($event)" aria-expanded="false">
+            <div class="user-avatar-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 35px; height: 35px; border-radius: 50%; background-color: #0A2540; font-size: 0.85rem;">
+              {{ getUserInitials() }}
+            </div>
+            <span class="d-none d-sm-inline fw-semibold text-dark text-sm me-1">{{ user.usr_name }}</span>
+          </button>
+          
+          <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 rounded-3 animate-fade-in" [class.show]="isDropdownOpen" aria-labelledby="userMenuButton" style="min-width: 200px;">
+            <li class="px-3 py-2 border-bottom border-light mb-1">
+              <div class="fw-bold text-dark text-sm">{{ user.usr_name }} {{ user.usr_surname }}</div>
+              <div class="text-muted text-xs text-truncate" style="font-size: 0.75rem;">{{ user.usr_email }}</div>
+            </li>
+            <li>
+              <a class="dropdown-item rounded-2 text-sm px-3 py-2" routerLink="/user/backoffice-suite">
+                Mi Panel
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider my-1">
+            </li>
+            <li>
+              <button class="dropdown-item rounded-2 text-danger text-sm px-3 py-2 w-100 text-start" (click)="logout()">
+                Cerrar Sesión
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </nav>

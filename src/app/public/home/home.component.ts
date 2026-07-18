@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 interface ATSModule {
   id: string;
@@ -14,12 +16,15 @@ interface ATSModule {
 @Component({
   selector: 'app-home',
   imports: [
-    CommonModule
+    CommonModule,
+    RouterModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
+
+  isDropdownOpen = false;
 
   // Módulo por defecto seleccionado/resaltado en el Hero
   activeModule: string = 'Central';
@@ -83,9 +88,34 @@ export class HomeComponent implements OnInit {
     }
   ];
 
-  constructor() { }
+  constructor(
+    public _authService: AuthService
+  ) { }
 
   ngOnInit(): void {
+  }
+
+  public getUserInitials(): string {
+    const user = this._authService.currentUser();
+    if (!user) return '';
+    const nameInitial = user.usr_name ? user.usr_name.charAt(0).toUpperCase() : '';
+    const surnameInitial = user.usr_surname ? user.usr_surname.charAt(0).toUpperCase() : '';
+    return `${nameInitial}${surnameInitial}`;
+  }
+
+  public logout(): void {
+    this._authService.logout();
+    this.isDropdownOpen = false;
+  }
+
+  public toggleDropdown(event: Event): void {
+    event.stopPropagation();
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  @HostListener('document:click')
+  public closeDropdown(): void {
+    this.isDropdownOpen = false;
   }
 
   // Permite interactuar con los nodos del SVG cambiando los detalles descriptivos de la pantalla

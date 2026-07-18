@@ -104,3 +104,38 @@
 .animate-fade-in {
   animation: fadeIn 0.35s ease-out forwards;
 }
+
+/* Estilos de botones de Navbar */
+.hover-btn-cyan {
+  transition: all 0.25s ease-in-out;
+  
+  &:hover {
+    background-color: #00E5FF !important;
+    color: #0A2540 !important;
+    border-color: #00E5FF !important;
+  }
+}
+
+/* Remover flechita de dropdown */
+.no-caret::after {
+  display: none !important;
+}
+
+/* Estilos adicionales para dropdown premium */
+.dropdown-menu {
+  box-shadow: 0 10px 30px rgba(10, 37, 64, 0.08) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  
+  .dropdown-item {
+    transition: all 0.2s ease-in-out;
+    
+    &:hover {
+      background-color: rgba(248, 250, 252, 0.9);
+      color: #0A2540;
+    }
+  }
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
