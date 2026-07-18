@@ -4,11 +4,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build --prod
+RUN npm run build
 
 # Etapa de producción
 FROM nginx:alpine
-COPY --from=builder /app/dist/ats-web-app/browser/. /usr/share/nginx/html/
+COPY --from=builder /app/dist/ATS-web-app/browser/. /usr/share/nginx/html/
 
 # 👇 Copia tu nginx.conf personalizado
 COPY nginx.conf /etc/nginx/conf.d/default.conf
