@@ -1,7 +1,9 @@
-<div class="d-flex bg-light min-vh-screen text-dark font-sans">
+<div class="d-flex bg-light min-vh-screen text-dark font-sans" *ngIf="_authService.currentUser() as user">
   
+  <!-- BARRA LATERAL (SIDEBAR) -->
   <aside class="bg-white border-end d-flex flex-column justify-content-between p-3 position-sticky top-0 vh-100" style="width: 260px; z-index: 1030;">
     <div>
+      <!-- Marca -->
       <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
         <svg class="me-2" width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="50,15 15,75 85,75" stroke="#0A2540" stroke-width="6" stroke-linejoin="round"/>
@@ -16,149 +18,350 @@
         </div>
       </div>
 
+      <!-- Menú de Navegación -->
       <ul class="nav nav-pills flex-column gap-1 small fw-semibold">
         <li class="nav-item">
-          <a class="nav-link active d-flex align-items-center gap-2 py-2.5 rounded-3" style="background-color: #0A2540;" href="javascript:void(0)">
+          <button (click)="setTab('launcher')" 
+             class="btn text-start w-100 d-flex align-items-center gap-2 py-2.5 rounded-3 border-0 transition-all"
+             [ngClass]="activeTab === 'launcher' ? 'active-menu-btn text-white' : 'text-secondary text-dark-hover bg-transparent'">
             <span>🏠</span> Inicio / Launcher
-          </a>
+          </button>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-secondary text-dark-hover d-flex align-items-center gap-2 py-2.5" href="javascript:void(0)">
+          <button class="btn text-start w-100 d-flex align-items-center gap-2 py-2.5 border-0 text-secondary text-dark-hover bg-transparent" disabled>
             <span>💳</span> Mis Suscripciones
-          </a>
+          </button>
         </li>
-        <li class="nav-item" *ngIf="userSession?.isSysAdmin">
-          <a class="nav-link text-secondary text-dark-hover d-flex align-items-center gap-2 py-2.5" href="javascript:void(0)">
+        <!-- Solapa visible sólo para administradores del sistema -->
+        <li class="nav-item" *ngIf="user.usr_sysadmin">
+          <button (click)="setTab('audit')"
+             class="btn text-start w-100 d-flex align-items-center gap-2 py-2.5 rounded-3 border-0 transition-all"
+             [ngClass]="activeTab === 'audit' ? 'active-menu-btn text-white' : 'text-secondary text-dark-hover bg-transparent'">
             <span>🛡️</span> Auditoría Global
-          </a>
+          </button>
         </li>
       </ul>
     </div>
 
+    <!-- Perfil de usuario en el Footer de Sidebar -->
     <div class="border-top pt-3 d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center min-w-0 me-2">
-        <div class="rounded-circle bg-secondary bg-opacity-20 d-flex align-items-center justify-content-center text-dark fw-bold me-2" style="width: 36px; height: 36px; flex-shrink: 0;">
-          {{ userSession?.name?.charAt(0) }}{{ userSession?.surname?.charAt(0) }}
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold me-2 shadow-sm" 
+             style="width: 36px; height: 36px; flex-shrink: 0; background-color: #0A2540; font-size: 0.8rem;">
+          {{ user.usr_name.charAt(0) }}{{ user.usr_surname.charAt(0) }}
         </div>
         <div class="d-flex flex-column min-w-0">
-          <span class="fw-bold small text-dark text-truncate lh-1">{{ userSession?.name }} {{ userSession?.surname }}</span>
-          <small class="text-muted text-truncate" style="font-size: 0.7rem;">{{ userSession?.email }}</small>
+          <span class="fw-bold small text-dark text-truncate lh-1">{{ user.usr_name }} {{ user.usr_surname }}</span>
+          <small class="text-muted text-truncate" style="font-size: 0.7rem;">{{ user.usr_email }}</small>
         </div>
       </div>
-      <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" (click)="logout()">
+      <button class="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold small" (click)="logout()">
         Salir
       </button>
     </div>
   </aside>
 
-  <main class="flex-grow-1 p-4 p-md-5" style="max-width: 1400px;">
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="flex-grow-1 p-4 p-md-5" style="max-width: 1400px; overflow-x: hidden;">
     
+    <!-- Encabezado superior -->
     <header class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5">
       <div>
-        <h1 class="h3 fw-extrabold tracking-tight mb-1" style="color: #0A2540;">Hola de nuevo, {{ userSession?.name }}</h1>
+        <h1 class="h3 fw-extrabold tracking-tight mb-1" style="color: #0A2540;">Hola de nuevo, {{ user.usr_name }}</h1>
         <p class="text-muted small mb-0">Gestioná tus plataformas autorizadas y monitoreá el estado del Shared Kernel.</p>
       </div>
       <div class="d-flex gap-2">
-        <span class="badge d-inline-flex align-items-center gap-1.5 px-3 py-2 text-dark bg-white border rounded-pill small">
+        <span class="badge d-inline-flex align-items-center gap-1.5 px-3 py-2 text-dark bg-white border rounded-pill small shadow-sm">
           <span class="spinner-grow spinner-grow-sm text-success" style="width: 8px; height: 8px;"></span>
           SSO Activo
         </span>
       </div>
     </header>
 
-    <section class="mb-5">
-      <h2 class="h5 fw-bold mb-4 d-flex align-items-center gap-2" style="color: #0A2540;">
-        <span>🚀</span> Lanzador de Aplicaciones
-      </h2>
-      
-      <div class="row g-4">
-        <div class="col-12 col-md-6 col-xl-4" *ngFor="let app of launcherApps">
-          <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden transition-card"
-               [class.opacity-75]="!app.hasAccess" [class.bg-white]="app.hasAccess" [class.bg-light-disable]="!app.hasAccess">
-            
-            <div class="card-body p-4 d-flex flex-column justify-content-between">
-              <div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <span class="text-uppercase text-muted fw-bold font-monospace" style="font-size: 0.65rem; tracking: 0.5px;">{{ app.type }}</span>
-                  <span class="badge rounded-pill px-2.5 py-1 small" 
-                        [ngClass]="app.hasAccess ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
-                    {{ app.hasAccess ? 'Autorizado' : 'Sin Acceso' }}
-                  </span>
+    <!-- PESTAÑA A: LANZADOR DE PLATAFORMAS (LAUNCHER) -->
+    <div *ngIf="activeTab === 'launcher'" class="animate-fade-in">
+      <section class="mb-5">
+        <h2 class="h5 fw-bold mb-4 d-flex align-items-center gap-2" style="color: #0A2540;">
+          <span>🚀</span> Lanzador de Aplicaciones
+        </h2>
+        
+        <div class="row g-4">
+          <div class="col-12 col-md-6 col-xl-4" *ngFor="let app of launcherApps">
+            <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden transition-card"
+                 [class.opacity-75]="!app.hasAccess" [class.bg-white]="app.hasAccess" [class.bg-light-disable]="!app.hasAccess">
+              
+              <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-uppercase text-muted fw-bold font-monospace" style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ app.type }}</span>
+                    <span class="badge rounded-pill px-2.5 py-1 small" 
+                          [ngClass]="app.hasAccess ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
+                      {{ app.hasAccess ? 'Autorizado' : 'Sin Acceso' }}
+                    </span>
+                  </div>
+
+                  <h3 class="h5 fw-bold mb-2 text-dark d-flex align-items-center gap-2">
+                    {{ app.name }}
+                  </h3>
+                  <p class="text-muted lh-sm mb-4" style="font-size: 0.85rem;">{{ app.description }}</p>
                 </div>
 
-                <h3 class="h5 fw-bold mb-2 text-dark d-flex align-items-center gap-2">
-                  {{ app.name }}
-                </h3>
-                <p class="text-muted lh-sm mb-4" style="font-size: 0.85rem;">{{ app.description }}</p>
-              </div>
-
-              <div class="pt-3 border-top border-light d-flex align-items-center justify-content-between">
-                <span class="font-monospace text-muted" style="font-size: 0.65rem;">DB: {{ app.dbName }}</span>
-                
-                <button *ngIf="app.hasAccess" (click)="launchApp(app.url)" class="btn btn-sm text-white px-3 fw-semibold transition-all hover-btn-cyan" style="background-color: #0A2540; border-radius: 6px; font-size: 0.8rem;">
-                  Ingresar &rarr;
-                </button>
-                
-                <button *ngIf="!app.hasAccess" class="btn btn-sm btn-outline-secondary px-3 fw-semibold" style="border-radius: 6px; font-size: 0.8rem;" disabled>
-                  🔒 Bloqueado
-                </button>
+                <div class="pt-3 border-top border-light d-flex align-items-center justify-content-between">
+                  <span class="font-monospace text-muted" style="font-size: 0.65rem;">DB: {{ app.dbName }}</span>
+                  
+                  <button *ngIf="app.hasAccess" (click)="launchApp(app.url)" class="btn btn-sm text-white px-3 fw-semibold transition-all hover-btn-cyan" style="background-color: #0A2540; border-radius: 6px; font-size: 0.8rem;">
+                    Ingresar &rarr;
+                  </button>
+                  
+                  <button *ngIf="!app.hasAccess" class="btn btn-sm btn-outline-secondary px-3 fw-semibold" style="border-radius: 6px; font-size: 0.8rem;" disabled>
+                    🔒 Bloqueado
+                  </button>
+                </div>
               </div>
             </div>
-
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="row g-4">
-      
-      <div class="col-12 col-lg-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
-          <h3 class="h6 fw-bold mb-4 border-bottom pb-2" style="color: #0A2540;">💳 Tu Plan de Facturación Consolidada</h3>
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div>
-              <span class="h2 fw-extrabold mb-0" style="color: #0A2540;">Bundle Enterprise</span>
-              <p class="text-success small fw-medium mb-0 mt-1">✓ Renovación automática el 01/08/2026</p>
+      <!-- Métricas y Facturación -->
+      <section class="row g-4">
+        <div class="col-12 col-lg-6">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h3 class="h6 fw-bold mb-4 border-bottom pb-2" style="color: #0A2540;">💳 Tu Plan de Facturación Consolidada</h3>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <div>
+                <span class="h2 fw-extrabold mb-0" style="color: #0A2540;">Bundle Enterprise</span>
+                <p class="text-success small fw-medium mb-0 mt-1">✓ Renovación automática el 01/08/2026</p>
+              </div>
+              <div class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-3 fw-bold">Activo</div>
             </div>
-            <div class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-3 fw-bold">Activo</div>
+            <p class="small text-muted mb-4">Este plan unifica el módulo base de ATS Community con infraestructura Works compartida para mantenimiento.</p>
+            <button class="btn btn-sm btn-outline-secondary w-fit fw-semibold" style="border-radius: 6px; font-size: 0.8rem;" disabled>
+              Gestionar Métodos de Pago
+            </button>
           </div>
-          <p class="small text-muted mb-4">Este plan unifica el módulo base de ATS Community con infraestructura Works compartida para mantenimiento.</p>
-          <button class="btn btn-sm btn-outline-secondary w-fit fw-semibold" style="border-radius: 6px; font-size: 0.8rem;">
-            Gestionar Métodos de Pago
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-white" style="background-color: #0F172A;">
+            <h3 class="h6 fw-bold mb-3 font-monospace text-info border-bottom border-secondary border-opacity-20 pb-2">// Shared Kernel Metrics</h3>
+            
+            <div class="row g-3 font-monospace" style="font-size: 0.8rem;">
+              <div class="col-6">
+                <span class="text-secondary d-block">TOKEN ISSUER:</span>
+                <span class="text-white">api.guva.idp</span>
+              </div>
+              <div class="col-6">
+                <span class="text-secondary d-block">SESSION TIMEOUT:</span>
+                <span class="text-white">7d (Shared Wildcard Cookie)</span>
+              </div>
+              <div class="col-12">
+                <span class="text-secondary d-block">MIDDLEWARE SSO STATUS:</span>
+                <span class="text-success d-flex align-items-center gap-1.5">
+                  <span class="d-inline-block bg-success rounded-circle" style="width: 6px; height: 6px;"></span>
+                  Active & Intercepting Requests
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-4 p-2 rounded bg-black bg-opacity-40 font-monospace border border-secondary border-opacity-10" style="font-size: 0.7rem;">
+              <span class="text-muted">[SSO-Log]</span> <span class="text-cyan">Cookie parsed and authenticated natively.</span><br>
+              <span class="text-muted">[SSO-Log]</span> <span class="text-warning">Token verified against Kernel database structure.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA B: AUDITORÍA GLOBAL (ADMINISTRADOR DE USUARIOS ESTILO CLOUDFLARE) -->
+    <div *ngIf="activeTab === 'audit'" class="animate-fade-in">
+      
+      <!-- VISTA 1: LISTADO DE USUARIOS (TABLA PLANA ESTILO CLOUDFLARE) -->
+      <div *ngIf="auditViewMode === 'list'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        
+        <div class="p-4 border-bottom border-light d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+          <div>
+            <h2 class="h5 fw-bold mb-1" style="color: #0A2540;">Directorio General de Cuentas</h2>
+            <p class="text-muted small mb-0">Listado completo de cuentas registradas en las plataformas integradas de ATS.</p>
+          </div>
+          <button (click)="loadUsers()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-2 border rounded-3 fw-semibold text-secondary">
+            <span>🔄</span> Actualizar
           </button>
         </div>
-      </div>
 
-      <div class="col-12 col-lg-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-white" style="background-color: #0F172A;">
-          <h3 class="h6 fw-bold mb-3 font-monospace text-info border-bottom border-secondary border-opacity-20 pb-2">// Shared Kernel Metrics</h3>
-          
-          <div class="row g-3 font-monospace" style="font-size: 0.8rem;">
-            <div class="col-6">
-              <span class="text-secondary d-block">TOKEN ISSUER:</span>
-              <span class="text-white">api.guva.idp</span>
-            </div>
-            <div class="col-6">
-              <span class="text-secondary d-block">SESSION TIMEOUT:</span>
-              <span class="text-white">8h (HttpOnly Cookie)</span>
-            </div>
-            <div class="col-12">
-              <span class="text-secondary d-block">SEQUELIZE MIDDLEWARE STATUS:</span>
-              <span class="text-success d-flex align-items-center gap-1.5">
-                <span class="d-inline-block bg-success rounded-circle" style="width: 6px; height: 6px;"></span>
-                Lazy Creation Listening
-              </span>
-            </div>
-          </div>
+        <!-- Alertas rápidas de error -->
+        <div *ngIf="errorMessage" class="m-4 alert alert-danger rounded-3 small p-3 animate-fade-in" role="alert">
+          {{ errorMessage }}
+        </div>
 
-          <div class="mt-4 p-2 rounded bg-black bg-opacity-40 font-monospace border border-secondary border-opacity-10" style="font-size: 0.7rem;">
-            <span class="text-muted">[04:05:12 PM]</span> <span class="text-cyan">SSO-Cookie parsed successfully for user_uuid</span><br>
-            <span class="text-muted">[04:05:12 PM]</span> <span class="text-warning">[LazyCheck] local database db_atsworks matches records.</span>
-          </div>
+        <!-- Spinner de carga -->
+        <div *ngIf="loadingUsers" class="d-flex flex-column align-items-center justify-content-center p-5">
+          <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+          <span class="text-muted small fw-medium">Cargando directorio de usuarios...</span>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div *ngIf="!loadingUsers" class="table-responsive">
+          <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+            <thead class="table-light text-muted fw-bold" style="font-size: 0.75rem;">
+              <tr>
+                <th class="ps-4 py-3">USUARIO / NICK</th>
+                <th class="py-3">EMAIL</th>
+                <th class="py-3">NOMBRE</th>
+                <th class="py-3">ROL / STATUS</th>
+                <th class="text-end pe-4 py-3">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of usersList" class="transition-all">
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" 
+                         style="width: 32px; height: 32px; background-color: #E2E8F0; color: #475569; font-size: 0.75rem;">
+                      {{ u.usr_name.charAt(0) }}{{ u.usr_surname.charAt(0) }}
+                    </div>
+                    <span class="fw-bold text-dark">&#64;{{ u.usr_nick }}</span>
+                  </div>
+                </td>
+                <td class="text-secondary">{{ u.usr_email }}</td>
+                <td>{{ u.usr_name }} {{ u.usr_surname }}</td>
+                <td>
+                  <span class="badge rounded-pill px-2.5 py-1" 
+                        [ngClass]="u.usr_sysadmin ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
+                    {{ u.usr_sysadmin ? 'System Admin' : 'Usuario Ecosistema' }}
+                  </span>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="d-flex justify-content-end gap-2">
+                    <button (click)="enterEditMode(u)" class="btn btn-sm btn-outline-primary border-0 rounded-3 px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1">
+                      <span>✏️</span> Editar
+                    </button>
+                    <!-- Previene eliminarse a sí mismo -->
+                    <button *ngIf="user.usr_uuid !== u.usr_uuid" (click)="deleteUser(u.usr_uuid)" class="btn btn-sm btn-outline-danger border-0 rounded-3 px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1">
+                      <span>🗑️</span> Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="usersList.length === 0">
+                <td colspan="5" class="text-center p-5 text-muted">
+                  No se encontraron usuarios registrados en la base de datos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-    </section>
+      <!-- VISTA 2: CONFIGURACIÓN DE CUENTA (FORMULARIO INLINE ESTILO CLOUDFLARE) -->
+      <div *ngIf="auditViewMode === 'edit'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden animate-fade-in">
+        
+        <!-- Cabecera del formulario / Breadcrumbs -->
+        <div class="p-4 border-bottom border-light">
+          <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb text-muted small mb-0 font-monospace" style="font-size: 0.75rem;">
+              <li class="breadcrumb-item"><a (click)="exitEditMode()" class="text-decoration-none cursor-pointer text-primary">Auditoría Global</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Configuración de Cuenta</li>
+              <li class="breadcrumb-item active text-dark" aria-current="page">&#64;{{ selectedUser?.usr_nick }}</li>
+            </ol>
+          </nav>
+          <h2 class="h5 fw-bold mb-0" style="color: #0A2540;">Editar Cuenta de Usuario</h2>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <!-- Alertas rápidas -->
+          <div *ngIf="successMessage" class="alert alert-success rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+            {{ successMessage }}
+          </div>
+          <div *ngIf="errorMessage" class="alert alert-danger rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+            <strong>Error:</strong> {{ errorMessage }}
+          </div>
+
+          <form [formGroup]="editForm" (ngSubmit)="saveEditedUser()" novalidate>
+            
+            <div class="row g-4 mb-4">
+              <!-- Nombre -->
+              <div class="col-12 col-md-6">
+                <label for="usr_name" class="form-label small fw-bold text-dark">Nombre</label>
+                <input type="text" id="usr_name" formControlName="usr_name"
+                       class="form-control px-3 py-2 rounded-3 text-sm"
+                       [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_name')?.errors }"
+                       placeholder="Nombre"/>
+                <div *ngIf="submitted && editForm.get('usr_name')?.errors?.['required']" class="invalid-feedback small">
+                  El nombre es obligatorio.
+                </div>
+              </div>
+
+              <!-- Apellido -->
+              <div class="col-12 col-md-6">
+                <label for="usr_surname" class="form-label small fw-bold text-dark">Apellido</label>
+                <input type="text" id="usr_surname" formControlName="usr_surname"
+                       class="form-control px-3 py-2 rounded-3 text-sm"
+                       [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_surname')?.errors }"
+                       placeholder="Apellido"/>
+                <div *ngIf="submitted && editForm.get('usr_surname')?.errors?.['required']" class="invalid-feedback small">
+                  El apellido es obligatorio.
+                </div>
+              </div>
+
+              <!-- Nick (Usuario) -->
+              <div class="col-12 col-md-6">
+                <label for="usr_nick" class="form-label small fw-bold text-dark">Nombre de Usuario (Nick)</label>
+                <input type="text" id="usr_nick" formControlName="usr_nick"
+                       class="form-control px-3 py-2 rounded-3 text-sm"
+                       [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_nick')?.errors }"
+                       placeholder="ej: alvaro123"/>
+                <div *ngIf="submitted && editForm.get('usr_nick')?.errors?.['required']" class="invalid-feedback small">
+                  El nick es obligatorio.
+                </div>
+              </div>
+
+              <!-- Correo electrónico -->
+              <div class="col-12 col-md-6">
+                <label for="usr_email" class="form-label small fw-bold text-dark">Correo Electrónico</label>
+                <input type="email" id="usr_email" formControlName="usr_email"
+                       class="form-control px-3 py-2 rounded-3 text-sm"
+                       [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_email')?.errors }"
+                       placeholder="ej: usuario@correo.com"/>
+                <div *ngIf="submitted && editForm.get('usr_email')?.errors?.['required']" class="invalid-feedback small">
+                  El correo es obligatorio.
+                </div>
+                <div *ngIf="editForm.get('usr_email')?.errors?.['email']" class="invalid-feedback small">
+                  Ingresá un formato de email válido.
+                </div>
+              </div>
+
+              <!-- Rol / sysadmin -->
+              <div class="col-12">
+                <div class="p-3 bg-light rounded-3 border border-light d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="d-block fw-bold text-dark text-sm mb-1">Acceso de Administrador Global (SysAdmin)</span>
+                    <small class="text-muted" style="font-size: 0.75rem;">Habilita el acceso total a las auditorías globales del Kernel y la facturación consolidada de la suite.</small>
+                  </div>
+                  <div class="form-check form-switch ps-0">
+                    <input class="form-check-input ms-0 cursor-pointer" type="checkbox" role="switch" id="usr_sysadmin" formControlName="usr_sysadmin" style="width: 2.8em; height: 1.4em;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="d-flex align-items-center gap-3 pt-3 border-top border-light">
+              <button type="submit" [disabled]="loadingSave" class="btn text-white px-4 py-2.5 fw-semibold transition-all rounded-3 shadow hover-btn-cyan d-flex align-items-center gap-2" style="background-color: #0A2540; font-size: 0.85rem;">
+                <span *ngIf="loadingSave" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                {{ loadingSave ? 'Guardando cambios...' : 'Guardar Configuración' }}
+              </button>
+              <button type="button" (click)="exitEditMode()" class="btn btn-outline-secondary px-4 py-2.5 fw-semibold rounded-3 text-sm" style="border-radius: 8px; font-size: 0.85rem;">
+                Cancelar
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+
+    </div>
 
   </main>
 </div>

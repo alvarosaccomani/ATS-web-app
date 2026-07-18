@@ -12,6 +12,12 @@
   transition: all 0.2s ease-in-out;
 }
 
+/* Botón activo del menú lateral */
+.active-menu-btn {
+  background-color: #0A2540 !important;
+  box-shadow: 0 4px 12px rgba(10, 37, 64, 0.15);
+}
+
 /* Efecto suave para las tarjetas del App Launcher */
 .transition-card {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
@@ -29,10 +35,14 @@
 }
 
 /* Botón con el acento celeste de la marca */
-.hover-btn-cyan:hover {
-  background-color: #00E5FF !important;
-  color: #0A2540 !important;
-  border-color: #00E5FF !important;
+.hover-btn-cyan {
+  transition: all 0.25s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    background-color: #00E5FF !important;
+    color: #0A2540 !important;
+    border-color: #00E5FF !important;
+  }
 }
 
 /* Botón de ancho automático basado en contenido */
@@ -42,3 +52,62 @@
 
 /* Terminal de Logs internos */
 .text-cyan { color: #00E5FF; }
+
+/* cursor pointer auxiliar */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* --- ESTILO DE TABLA PLANA CLOUDFLARE --- */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  
+  thead th {
+    background-color: #F8FAFC;
+    color: #475569;
+    border-bottom: 1px solid #E2E8F0;
+    font-weight: 600;
+  }
+  
+  tbody tr {
+    transition: background-color 0.15s ease-in-out;
+    
+    &:hover {
+      background-color: rgba(248, 250, 252, 0.8) !important;
+    }
+    
+    td {
+      border-bottom: 1px solid #F1F5F9;
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+  }
+}
+
+/* --- FORMULARIOS --- */
+.form-control {
+  border-color: #E2E8F0;
+  transition: all 0.2s ease-in-out;
+  
+  &:focus {
+    border-color: rgba(0, 229, 255, 0.5);
+    box-shadow: 0 0 0 0.25rem rgba(0, 229, 255, 0.15);
+    outline: 0;
+  }
+}
+
+/* Switch personalizado */
+.form-check-input:checked {
+  background-color: #00E5FF;
+  border-color: #00E5FF;
+}
+
+/* --- ANIMACIONES DE ENTRADA --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}

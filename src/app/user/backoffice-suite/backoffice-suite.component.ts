@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService, UserSession } from '../../core/services/auth.service';
+import { UsersService } from '../../core/services/users.service';
 
 interface LauncherApp {
   id: string;
@@ -11,34 +15,34 @@ interface LauncherApp {
   hasAccess: boolean;
 }
 
-interface UserPayload {
-  usr_Uuid: string;
-  email: string;
-  name: string;
-  surname: string;
-  isSysAdmin: boolean;
-}
-
 @Component({
   selector: 'app-backoffice-suite',
   imports: [
-    CommonModule
+    CommonModule,
+    ReactiveFormsModule
   ],
   templateUrl: './backoffice-suite.component.html',
   styleUrl: './backoffice-suite.component.scss',
 })
 export class BackofficeSuiteComponent implements OnInit {
 
-  // Payload simulado extraído tras la decodificación del token del Silent SSO
-  userSession: UserPayload = {
-    usr_Uuid: 'e4b29f74-3aa8-4f5f-8769-e127ce4a32d6',
-    email: 'admin@barriocerrado.com',
-    name: 'Mariano',
-    surname: 'Rodríguez',
-    isSysAdmin: true // Habilita la solapa de auditoría en el sidebar
-  };
+  // Navegación de pestañas secundarias
+  activeTab: 'launcher' | 'audit' = 'launcher';
+  
+  // Vista interna de Auditoría (listado o edición Cloudflare-style)
+  auditViewMode: 'list' | 'edit' = 'list';
 
-  // Listado de las apps mapeadas desde el Core con sus permisos específicos para este usuario
+  // Auditoría: Listado y Formulario
+  usersList: any[] = [];
+  loadingUsers = false;
+  selectedUser: any = null;
+  editForm!: FormGroup;
+  submitted = false;
+  loadingSave = false;
+  errorMessage = '';
+  successMessage = '';
+
+  // Listado estático de las apps mapeadas desde el Core con sus permisos específicos
   launcherApps: LauncherApp[] = [
     {
       id: 'Central',
@@ -74,7 +78,7 @@ export class BackofficeSuiteComponent implements OnInit {
       description: 'E-commerce integrado con carrito de compras y control avanzado de stock para suministros locales.',
       dbName: 'db_atsmarket',
       url: 'https://market.tuplataforma.com',
-      hasAccess: false // Deshabilitado: el usuario no contrató este módulo para su empresa
+      hasAccess: false
     },
     {
       id: 'Management',
@@ -96,17 +100,124 @@ export class BackofficeSuiteComponent implements OnInit {
     }
   ];
 
-  constructor() { }
+  constructor(
+    public _authService: AuthService,
+    private _usersService: UsersService,
+    private fb: FormBuilder,
+    private router: Router
+  ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.initForm();
+  }
 
-  // Simulación de redirección controlada por el Router/Window a los subdominios de cada micro-frontend
+  private initForm(): void {
+    this.editForm = this.fb.group({
+      usr_nick: ['', [Validators.required]],
+      usr_email: ['', [Validators.required, Validators.email]],
+      usr_name: ['', [Validators.required]],
+      usr_surname: ['', [Validators.required]],
+      usr_sysadmin: [false]
+    });
+  }
+
+  public setTab(tab: 'launcher' | 'audit'): void {
+    this.activeTab = tab;
+    if (tab === 'audit') {
+      this.auditViewMode = 'list';
+      this.loadUsers();
+    }
+  }
+
+  public loadUsers(): void {
+    this.loadingUsers = true;
+    this.errorMessage = '';
+    this._usersService.getUsers().subscribe({
+      next: (response) => {
+        this.loadingUsers = false;
+        if (response.success && response.data) {
+          this.usersList = response.data;
+        } else {
+          this.usersList = response.data || [];
+        }
+      },
+      error: (error) => {
+        this.loadingUsers = false;
+        this.errorMessage = 'No se pudo recuperar los usuarios de la base de datos.';
+      }
+    });
+  }
+
+  public enterEditMode(user: any): void {
+    this.selectedUser = user;
+    this.auditViewMode = 'edit';
+    this.submitted = false;
+    this.errorMessage = '';
+    this.successMessage = '';
+    
+    this.editForm.patchValue({
+      usr_nick: user.usr_nick,
+      usr_email: user.usr_email,
+      usr_name: user.usr_name,
+      usr_surname: user.usr_surname,
+      usr_sysadmin: !!user.usr_sysadmin
+    });
+  }
+
+  public exitEditMode(): void {
+    this.selectedUser = null;
+    this.auditViewMode = 'list';
+    this.editForm.reset();
+  }
+
+  public saveEditedUser(): void {
+    this.submitted = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.editForm.invalid || !this.selectedUser) {
+      return;
+    }
+
+    this.loadingSave = true;
+    this._usersService.updateUser(this.selectedUser.usr_uuid, this.editForm.value).subscribe({
+      next: (response) => {
+        this.loadingSave = false;
+        this.successMessage = 'Usuario actualizado correctamente.';
+        this.loadUsers();
+        
+        // Retornar a la vista principal después de 1.5s
+        setTimeout(() => {
+          this.exitEditMode();
+        }, 1500);
+      },
+      error: (error) => {
+        this.loadingSave = false;
+        this.errorMessage = error.error?.error || error.error?.message || 'Ocurrió un error al intentar actualizar el usuario.';
+      }
+    });
+  }
+
+  public deleteUser(usr_uuid: string): void {
+    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+      this._usersService.deleteUser(usr_uuid).subscribe({
+        next: () => {
+          this.loadUsers();
+        },
+        error: () => {
+          this.errorMessage = 'No se pudo eliminar el usuario seleccionado.';
+        }
+      });
+    }
+  }
+
   public launchApp(url: string): void {
-    console.log(`[Router] Redirigiendo silenciosamente con token SSO activo hacia: ${url}`);
-    // window.location.href = url;
+    console.log(`[Router] Redirigiendo con token SSO activo hacia: ${url}`);
+    window.open(url, '_blank');
   }
 
   public logout(): void {
-    console.log('[SSO] Destruyendo cookie de sesión segura Domain=.tuplataforma.com');
+    this._authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 }
