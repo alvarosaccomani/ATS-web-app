@@ -61,6 +61,10 @@ export class AuthService {
     return this.http.post<any>(`${environment.apiUrl}user-email-exist`, { usr_email });
   }
 
+  public confirmAccount(token: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}confirm-account`, { token });
+  }
+
   public logout(): void {
     localStorage.removeItem('ats_token');
     localStorage.removeItem('ats_user');
