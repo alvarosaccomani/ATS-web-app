@@ -65,6 +65,14 @@ export class AuthService {
     return this.http.post<any>(`${environment.apiUrl}confirm-account`, { token });
   }
 
+  public forgotPassword(usr_email: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}forgot-password`, { usr_email });
+  }
+
+  public resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}reset-password`, { token, newPassword });
+  }
+
   public logout(): void {
     localStorage.removeItem('ats_token');
     localStorage.removeItem('ats_user');
