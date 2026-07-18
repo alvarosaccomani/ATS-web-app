@@ -1,0 +1,32 @@
+/* Botón con el acento celeste de la marca */
+.hover-btn-cyan {
+  transition: all 0.25s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    background-color: #00E5FF !important;
+    color: #0A2540 !important;
+    border-color: #00E5FF !important;
+  }
+}
+
+/* Link secundario con efecto hover */
+.link-muted:hover {
+  color: #0A2540 !important;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

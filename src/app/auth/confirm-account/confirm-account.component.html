@@ -1,1 +1,65 @@
-<p>confirm-account works!</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100 p-3 bg-light bg-opacity-25" style="background-color: #F8FAFC;">
+  
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden w-100" style="max-width: 480px;">
+    
+    <div class="card-body p-4 p-md-5 text-center">
+      
+      <!-- Logo central de ATS -->
+      <svg class="mb-4 cursor-pointer" routerLink="/public/home" width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,15 15,75 85,75" stroke="#0A2540" stroke-width="6" stroke-linejoin="round"/>
+        <circle cx="50" cy="15" r="5" fill="#00E5FF"/>
+        <circle cx="15" cy="75" r="5" fill="#00E5FF"/>
+        <circle cx="85" cy="75" r="5" fill="#00E5FF"/>
+        <circle cx="50" cy="55" r="14" fill="#0A2540"/>
+      </svg>
+
+      <!-- Estado: Cargando -->
+      <div *ngIf="status === 'loading'" class="animate-fade-in py-4">
+        <div class="spinner-border text-primary mb-4" style="width: 3rem; height: 3rem; color: #0A2540 !important;" role="status">
+          <span class="visually-hidden">Procesando...</span>
+        </div>
+        <h2 class="h4 fw-extrabold mb-2" style="color: #0A2540;">Verificando tu cuenta</h2>
+        <p class="text-muted small px-3">Estamos validando tu token de confirmación de correo. Por favor, aguardá un momento.</p>
+      </div>
+
+      <!-- Estado: Éxito -->
+      <div *ngIf="status === 'success'" class="animate-fade-in py-3">
+        <!-- Checkmark animado -->
+        <div class="mb-4 d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10" style="width: 72px; height: 72px;">
+          <svg class="text-success animate-scale-up" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="h4 fw-extrabold mb-2 text-success">¡Cuenta Confirmada!</h2>
+        <p class="text-muted small px-2 mb-4">Tu cuenta de usuario ha sido verificada de forma exitosa. Ya podés acceder a todas tus plataformas.</p>
+        
+        <button routerLink="/auth/login" class="btn text-white w-100 py-2.5 fw-semibold rounded-3 shadow hover-btn-cyan" style="background-color: #0A2540;">
+          Iniciar Sesión
+        </button>
+      </div>
+
+      <!-- Estado: Error -->
+      <div *ngIf="status === 'error'" class="animate-fade-in py-3">
+        <!-- Cruz de error -->
+        <div class="mb-4 d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10" style="width: 72px; height: 72px;">
+          <svg class="text-danger animate-scale-up" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <h2 class="h4 fw-extrabold mb-2 text-danger">Error de Confirmación</h2>
+        <p class="text-muted small px-2 mb-4">{{ errorMessage }}</p>
+        
+        <div class="d-flex flex-column gap-2">
+          <button routerLink="/auth/register" class="btn text-white w-100 py-2.5 fw-semibold rounded-3 shadow hover-btn-cyan" style="background-color: #0A2540;">
+            Volver a Registrarse
+          </button>
+          <a routerLink="/public/home" class="small text-decoration-none fw-semibold link-muted mt-2" style="color: #64748B;">
+            Ir al Inicio
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
