@@ -1,1 +1,159 @@
-<p>register works!</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100 p-3 bg-light bg-opacity-25" style="background-color: #F8FAFC;">
+  
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden w-100" style="max-width: 580px;">
+    
+    <div class="card-body p-4 p-md-5">
+      
+      <!-- Cabecera de la marca -->
+      <div class="text-center mb-4">
+        <svg class="mb-3 cursor-pointer" routerLink="/public/home" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,15 15,75 85,75" stroke="#0A2540" stroke-width="6" stroke-linejoin="round"/>
+          <circle cx="50" cy="15" r="5" fill="#00E5FF"/>
+          <circle cx="15" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="85" cy="75" r="5" fill="#00E5FF"/>
+          <circle cx="50" cy="55" r="14" fill="#0A2540"/>
+        </svg>
+        <h1 class="h3 fw-extrabold mb-1" style="color: #0A2540;">Crea tu Cuenta Única</h1>
+        <p class="text-muted small">Registrate una sola vez y accedé a todas las plataformas de la suite.</p>
+      </div>
+
+      <!-- Alertas de estado -->
+      <div *ngIf="successMessage" class="alert alert-success rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
+
+      <!-- Formulario Reactivo -->
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-sm-6">
+            <label for="usr_name" class="form-label small fw-bold text-dark">Nombre</label>
+            <input type="text" id="usr_name" formControlName="usr_name"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerForm.get('usr_name')?.errors }"
+                   placeholder="Ej: Mariano"/>
+            <div *ngIf="submitted && registerForm.get('usr_name')?.errors?.['required']" class="invalid-feedback small">
+              El nombre es obligatorio.
+            </div>
+          </div>
+          
+          <div class="col-12 col-sm-6">
+            <label for="usr_surname" class="form-label small fw-bold text-dark">Apellido</label>
+            <input type="text" id="usr_surname" formControlName="usr_surname"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerForm.get('usr_surname')?.errors }"
+                   placeholder="Ej: Rodríguez"/>
+            <div *ngIf="submitted && registerForm.get('usr_surname')?.errors?.['required']" class="invalid-feedback small">
+              El apellido es obligatorio.
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="usr_nick" class="form-label small fw-bold text-dark">Nombre de Usuario (Nick)</label>
+          <div class="position-relative">
+            <input type="text" id="usr_nick" formControlName="usr_nick"
+                   class="form-control px-3 py-2 rounded-3 text-sm pe-5"
+                   [ngClass]="{ 'is-invalid': (submitted && registerForm.get('usr_nick')?.errors) || (registerForm.get('usr_nick')?.touched && nickExists) }"
+                   (blur)="onNickBlur()"
+                   placeholder="Ej: marianorodriguez"/>
+            
+            <div class="position-absolute end-0 top-50 translate-middle-y pe-3" *ngIf="nickChecking">
+              <span class="spinner-border spinner-border-sm text-secondary" role="status"></span>
+            </div>
+            <div class="position-absolute end-0 top-50 translate-middle-y pe-3 text-success small" *ngIf="!nickChecking && registerForm.get('usr_nick')?.valid && !nickExists && registerForm.get('usr_nick')?.value">
+              ✓ Disponible
+            </div>
+          </div>
+          
+          <div *ngIf="submitted && registerForm.get('usr_nick')?.errors?.['required']" class="invalid-feedback d-block small">
+            El nombre de usuario es obligatorio.
+          </div>
+          <div *ngIf="registerForm.get('usr_nick')?.errors?.['minlength']" class="invalid-feedback d-block small">
+            Debe contener al menos 3 caracteres.
+          </div>
+          <div *ngIf="!nickChecking && nickExists" class="invalid-feedback d-block small">
+            Este nombre de usuario ya está registrado.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="usr_email" class="form-label small fw-bold text-dark">Correo Electrónico</label>
+          <div class="position-relative">
+            <input type="email" id="usr_email" formControlName="usr_email"
+                   class="form-control px-3 py-2 rounded-3 text-sm pe-5"
+                   [ngClass]="{ 'is-invalid': (submitted && registerForm.get('usr_email')?.errors) || (registerForm.get('usr_email')?.touched && emailExists) }"
+                   (blur)="onEmailBlur()"
+                   placeholder="correo@ejemplo.com"/>
+            
+            <div class="position-absolute end-0 top-50 translate-middle-y pe-3" *ngIf="emailChecking">
+              <span class="spinner-border spinner-border-sm text-secondary" role="status"></span>
+            </div>
+            <div class="position-absolute end-0 top-50 translate-middle-y pe-3 text-success small" *ngIf="!emailChecking && registerForm.get('usr_email')?.valid && !emailExists && registerForm.get('usr_email')?.value">
+              ✓ Disponible
+            </div>
+          </div>
+          
+          <div *ngIf="submitted && registerForm.get('usr_email')?.errors?.['required']" class="invalid-feedback d-block small">
+            El correo electrónico es obligatorio.
+          </div>
+          <div *ngIf="registerForm.get('usr_email')?.errors?.['email']" class="invalid-feedback d-block small">
+            Por favor introduce un formato de correo válido.
+          </div>
+          <div *ngIf="!emailChecking && emailExists" class="invalid-feedback d-block small">
+            Este correo electrónico ya está en uso.
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-sm-6">
+            <label for="usr_password" class="form-label small fw-bold text-dark">Contraseña</label>
+            <input type="password" id="usr_password" formControlName="usr_password"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerForm.get('usr_password')?.errors }"
+                   placeholder="Mínimo 6 caracteres"/>
+            <div *ngIf="submitted && registerForm.get('usr_password')?.errors?.['required']" class="invalid-feedback small">
+              La contraseña es obligatoria.
+            </div>
+            <div *ngIf="registerForm.get('usr_password')?.errors?.['minlength']" class="invalid-feedback small">
+              Debe contener al menos 6 caracteres.
+            </div>
+          </div>
+          
+          <div class="col-12 col-sm-6">
+            <label for="usr_confirm_password" class="form-label small fw-bold text-dark">Confirmar Contraseña</label>
+            <input type="password" id="usr_confirm_password" formControlName="usr_confirm_password"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerForm.get('usr_confirm_password')?.errors }"
+                   placeholder="Repetir contraseña"/>
+            <div *ngIf="submitted && registerForm.get('usr_confirm_password')?.errors?.['required']" class="invalid-feedback small">
+              Repetir contraseña es obligatorio.
+            </div>
+            <div *ngIf="registerForm.get('usr_confirm_password')?.errors?.['passwordMismatch']" class="invalid-feedback small">
+              Las contraseñas no coinciden.
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de Envío -->
+        <button type="submit" [disabled]="loading" class="btn text-white w-100 py-2.5 fw-semibold transition-all rounded-3 shadow hover-btn-cyan d-flex align-items-center justify-content-center gap-2" style="background-color: #0A2540;">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{ loading ? 'Registrando cuenta...' : 'Crear Cuenta' }}
+        </button>
+
+      </form>
+
+      <!-- Pie del formulario -->
+      <div class="text-center mt-4">
+        <a routerLink="/public/home" class="small text-decoration-none fw-semibold transition-colors link-muted" style="color: #64748B;">
+          &larr; Volver al Inicio
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
