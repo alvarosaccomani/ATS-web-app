@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { AuthService, UserSession } from '../../core/services/auth.service';
 import { UsersService } from '../../core/services/users.service';
+import { ApplicationsService } from '../../core/services/applications.service';
 
 interface LauncherApp {
   id: string;
@@ -103,12 +104,35 @@ export class BackofficeSuiteComponent implements OnInit {
   constructor(
     public _authService: AuthService,
     private _usersService: UsersService,
+    private _applicationsService: ApplicationsService,
     private fb: FormBuilder,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.loadApplications();
+  }
+
+  public loadApplications(): void {
+    this._applicationsService.getApplications().subscribe({
+      next: (response: any) => {
+        if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+          this.launcherApps = response.data.map((app: any) => ({
+            id: app.app_cod || app.app_uuid,
+            name: app.app_name,
+            type: 'Core',
+            description: app.app_description,
+            dbName: app.app_dbname,
+            url: app.app_url,
+            hasAccess: app.app_hasaccess ?? true
+          }));
+        }
+      },
+      error: () => {
+        // Conserva el catálogo por defecto como fallback si la DB está vacía
+      }
+    });
   }
 
   private initForm(): void {
@@ -133,7 +157,7 @@ export class BackofficeSuiteComponent implements OnInit {
     this.loadingUsers = true;
     this.errorMessage = '';
     this._usersService.getUsers().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.loadingUsers = false;
         if (response.success && response.data) {
           this.usersList = response.data;
@@ -141,7 +165,7 @@ export class BackofficeSuiteComponent implements OnInit {
           this.usersList = response.data || [];
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         this.loadingUsers = false;
         this.errorMessage = 'No se pudo recuperar los usuarios de la base de datos.';
       }
@@ -181,7 +205,7 @@ export class BackofficeSuiteComponent implements OnInit {
 
     this.loadingSave = true;
     this._usersService.updateUser(this.selectedUser.usr_uuid, this.editForm.value).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.loadingSave = false;
         this.successMessage = 'Usuario actualizado correctamente.';
         this.loadUsers();
@@ -191,7 +215,7 @@ export class BackofficeSuiteComponent implements OnInit {
           this.exitEditMode();
         }, 1500);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.loadingSave = false;
         this.errorMessage = error.error?.error || error.error?.message || 'Ocurrió un error al intentar actualizar el usuario.';
       }
