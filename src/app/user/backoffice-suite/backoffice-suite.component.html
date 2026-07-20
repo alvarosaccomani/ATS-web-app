@@ -70,7 +70,25 @@
         <h1 class="h3 fw-extrabold tracking-tight mb-1" style="color: #0A2540;">Hola de nuevo, {{ user.usr_name }}</h1>
         <p class="text-muted small mb-0">Gestioná tus plataformas autorizadas y monitoreá el estado del Shared Kernel.</p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <!-- SELECTOR DE EMPRESA ACTIVA (TENANT SWITCHER) -->
+        <div class="dropdown" *ngIf="_companiesService.activeCompany() as activeCmp">
+          <button class="btn btn-sm btn-white border rounded-pill px-3 py-2 dropdown-toggle d-flex align-items-center gap-2 shadow-sm text-dark small" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-circle p-1">🏢</span>
+            <span class="fw-bold">{{ activeCmp.cmp_name }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2" style="min-width: 220px;">
+            <li><h6 class="dropdown-header text-uppercase small text-muted font-monospace" style="font-size: 0.65rem;">Empresas Asociadas</h6></li>
+            <li *ngFor="let item of userCompanies">
+              <button class="dropdown-item rounded-2 small d-flex justify-content-between align-items-center py-2" 
+                      (click)="selectCompany(item.company || item)">
+                <span class="fw-semibold">{{ (item.company?.cmp_name || 'Empresa') }}</span>
+                <span class="badge bg-light text-secondary ms-2 small" style="font-size: 0.65rem;">{{ item.usrcmp_role || 'MIEMBRO' }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
         <span class="badge d-inline-flex align-items-center gap-1.5 px-3 py-2 text-dark bg-white border rounded-pill small shadow-sm">
           <span class="spinner-grow spinner-grow-sm text-success" style="width: 8px; height: 8px;"></span>
           SSO Activo

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService, UserSession } from '../../core/services/auth.service';
 import { UsersService } from '../../core/services/users.service';
 import { ApplicationsService } from '../../core/services/applications.service';
+import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
 
 interface LauncherApp {
   id: string;
@@ -103,10 +104,13 @@ export class BackofficeSuiteComponent implements OnInit {
     }
   ];
 
+  public userCompanies: UserCompanyRelationItem[] = [];
+
   constructor(
     public _authService: AuthService,
     private _usersService: UsersService,
     private _applicationsService: ApplicationsService,
+    public _companiesService: CompaniesService,
     private fb: FormBuilder,
     private router: Router
   ) { }
@@ -114,6 +118,7 @@ export class BackofficeSuiteComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadApplications();
+    this.loadUserCompanies();
   }
 
   public loadApplications(): void {
@@ -137,6 +142,28 @@ export class BackofficeSuiteComponent implements OnInit {
         // Conserva el catálogo por defecto como fallback si la DB está vacía
       }
     });
+  }
+
+  public loadUserCompanies(): void {
+    const user = this._authService.currentUser();
+    if (user?.usr_uuid) {
+      this._companiesService.getUserCompanies(user.usr_uuid).subscribe({
+        next: (response: any) => {
+          if (response.success && Array.isArray(response.data)) {
+            this.userCompanies = response.data;
+            if (response.data.length > 0 && !this._companiesService.activeCompany()) {
+              const firstCompany = response.data[0].company || response.data[0];
+              this._companiesService.setActiveCompany(firstCompany);
+            }
+          }
+        },
+        error: (error: any) => {}
+      });
+    }
+  }
+
+  public selectCompany(company: any): void {
+    this._companiesService.setActiveCompany(company);
   }
 
   private initForm(): void {
