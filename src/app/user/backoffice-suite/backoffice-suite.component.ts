@@ -9,11 +9,13 @@ import { ApplicationsService } from '../../core/services/applications.service';
 interface LauncherApp {
   id: string;
   name: string;
-  type: 'Core' | 'B2B' | 'B2C' | 'Fintech';
+  type: string;
   description: string;
   dbName: string;
   url: string;
   hasAccess: boolean;
+  bkColor?: string | null;
+  frColor?: string | null;
 }
 
 @Component({
@@ -121,15 +123,17 @@ export class BackofficeSuiteComponent implements OnInit {
           this.launcherApps = response.data.map((app: any) => ({
             id: app.app_cod || app.app_uuid,
             name: app.app_name,
-            type: 'Core',
+            type: app.typeApplication?.tapp_name || app.typeApplication?.tapp_cod || 'Core',
             description: app.app_description,
             dbName: app.app_dbname,
             url: app.app_url,
-            hasAccess: app.app_hasaccess ?? true
+            hasAccess: app.app_hasaccess ?? true,
+            bkColor: app.typeApplication?.tapp_bkcolor || null,
+            frColor: app.typeApplication?.tapp_frcolor || null
           }));
         }
       },
-      error: () => {
+      error: (error: any) => {
         // Conserva el catálogo por defecto como fallback si la DB está vacía
       }
     });

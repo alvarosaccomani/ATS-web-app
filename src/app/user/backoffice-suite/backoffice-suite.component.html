@@ -93,7 +93,10 @@
               <div class="card-body p-4 d-flex flex-column justify-content-between">
                 <div>
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase text-muted fw-bold font-monospace" style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ app.type }}</span>
+                    <span class="text-uppercase fw-bold font-monospace px-2 py-0.5 rounded-2" 
+                          [style.backgroundColor]="app.bkColor || 'transparent'" 
+                          [style.color]="app.frColor || '#64748B'" 
+                          style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ app.type }}</span>
                     <span class="badge rounded-pill px-2.5 py-1 small" 
                           [ngClass]="app.hasAccess ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
                       {{ app.hasAccess ? 'Autorizado' : 'Sin Acceso' }}
