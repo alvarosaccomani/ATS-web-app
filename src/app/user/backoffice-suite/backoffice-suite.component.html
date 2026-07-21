@@ -384,6 +384,70 @@
 
       </div>
 
+      <!-- VISTA COMPLEMENTARIA: HISTORIAL DE LOGS Y EVENTOS DE SEGURIDAD -->
+      <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mt-4">
+        <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="h6 fw-bold mb-1" style="color: #0A2540;">🛡️ Historial de Eventos de Seguridad (Auth Audit Logs)</h2>
+            <p class="text-muted small mb-0">Eventos de inicio de sesión, intentos fallidos y trazabilidad de accesos por IP.</p>
+          </div>
+          <button (click)="loadAuditLogs()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-1.5 border rounded-3 fw-semibold text-secondary small">
+            <span>🔄</span> Recargar Logs
+          </button>
+        </div>
+
+        <div *ngIf="loadingAuditLogs" class="text-center py-4">
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          <span class="ms-2 small text-muted">Cargando eventos de seguridad...</span>
+        </div>
+
+        <div *ngIf="!loadingAuditLogs && auditLogs.length === 0" class="p-4 text-center text-muted small">
+          No se registraron eventos de seguridad recientes.
+        </div>
+
+        <div *ngIf="!loadingAuditLogs && auditLogs.length > 0" class="table-responsive">
+          <table class="table table-hover align-middle mb-0 text-sm">
+            <thead class="bg-light text-muted font-monospace small" style="font-size: 0.75rem;">
+              <tr>
+                <th class="ps-4">FECHA Y HORA</th>
+                <th>USUARIO</th>
+                <th>ACCIÓN</th>
+                <th>DIRECCIÓN IP</th>
+                <th>DISPOSITIVO / NAV.</th>
+                <th>ESTADO / MOTIVO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of auditLogs">
+                <td class="ps-4 font-monospace text-muted small">
+                  {{ log.usraulo_createdat | date:'dd/MM/yyyy HH:mm:ss' }}
+                </td>
+                <td>
+                  <span class="fw-semibold text-dark">{{ log.user?.usr_name || 'Desconocido' }} {{ log.user?.usr_surname || '' }}</span>
+                  <small class="d-block text-muted" style="font-size: 0.7rem;">{{ log.user?.usr_email || log.usr_uuid }}</small>
+                </td>
+                <td>
+                  <span class="badge px-2.5 py-1 rounded-pill small"
+                        [ngClass]="log.usraulo_action === 'LOGIN_SUCCESS' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20'">
+                    {{ log.usraulo_action }}
+                  </span>
+                </td>
+                <td class="font-monospace text-dark small">
+                  {{ log.usraulo_ipaddress || '127.0.0.1' }}
+                </td>
+                <td class="text-muted small text-truncate" style="max-width: 200px;" title="{{ log.usraulo_useragent }}">
+                  {{ log.usraulo_useragent || 'N/A' }}
+                </td>
+                <td>
+                  <span *ngIf="log.usraulo_failurereason" class="text-danger small">{{ log.usraulo_failurereason }}</span>
+                  <span *ngIf="!log.usraulo_failurereason" class="text-success small">OK</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
     <!-- PESTAÑA C: FACTURACIÓN Y SUSCRIPCIONES -->

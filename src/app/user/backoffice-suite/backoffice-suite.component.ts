@@ -7,6 +7,7 @@ import { UsersService } from '../../core/services/users.service';
 import { ApplicationsService } from '../../core/services/applications.service';
 import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
 import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
+import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
 
 interface LauncherApp {
   id: string;
@@ -108,6 +109,8 @@ export class BackofficeSuiteComponent implements OnInit {
   public userCompanies: UserCompanyRelationItem[] = [];
   public activeSubscriptions: SubscriptionItem[] = [];
   public loadingSubscriptions = false;
+  public auditLogs: UserAuthLogItem[] = [];
+  public loadingAuditLogs = false;
 
   constructor(
     public _authService: AuthService,
@@ -115,6 +118,7 @@ export class BackofficeSuiteComponent implements OnInit {
     private _applicationsService: ApplicationsService,
     public _companiesService: CompaniesService,
     private _subscriptionsService: SubscriptionsService,
+    private _userAuthLogsService: UserAuthLogsService,
     private fb: FormBuilder,
     private router: Router
   ) { }
@@ -185,9 +189,25 @@ export class BackofficeSuiteComponent implements OnInit {
     if (tab === 'audit') {
       this.auditViewMode = 'list';
       this.loadUsers();
+      this.loadAuditLogs();
     } else if (tab === 'subscriptions') {
       this.loadSubscriptions();
     }
+  }
+
+  public loadAuditLogs(): void {
+    this.loadingAuditLogs = true;
+    this._userAuthLogsService.getUserAuthLogs().subscribe({
+      next: (response: any) => {
+        this.loadingAuditLogs = false;
+        if (response.success && Array.isArray(response.data)) {
+          this.auditLogs = response.data;
+        }
+      },
+      error: () => {
+        this.loadingAuditLogs = false;
+      }
+    });
   }
 
   public loadSubscriptions(): void {
