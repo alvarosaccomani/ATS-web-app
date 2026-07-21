@@ -6,6 +6,7 @@ import { AuthService, UserSession } from '../../core/services/auth.service';
 import { UsersService } from '../../core/services/users.service';
 import { ApplicationsService } from '../../core/services/applications.service';
 import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
+import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
 
 interface LauncherApp {
   id: string;
@@ -31,7 +32,7 @@ interface LauncherApp {
 export class BackofficeSuiteComponent implements OnInit {
 
   // Navegación de pestañas secundarias
-  activeTab: 'launcher' | 'audit' = 'launcher';
+  public activeTab: 'launcher' | 'audit' | 'subscriptions' = 'launcher';
   
   // Vista interna de Auditoría (listado o edición Cloudflare-style)
   auditViewMode: 'list' | 'edit' = 'list';
@@ -105,12 +106,15 @@ export class BackofficeSuiteComponent implements OnInit {
   ];
 
   public userCompanies: UserCompanyRelationItem[] = [];
+  public activeSubscriptions: SubscriptionItem[] = [];
+  public loadingSubscriptions = false;
 
   constructor(
     public _authService: AuthService,
     private _usersService: UsersService,
     private _applicationsService: ApplicationsService,
     public _companiesService: CompaniesService,
+    private _subscriptionsService: SubscriptionsService,
     private fb: FormBuilder,
     private router: Router
   ) { }
@@ -176,11 +180,43 @@ export class BackofficeSuiteComponent implements OnInit {
     });
   }
 
-  public setTab(tab: 'launcher' | 'audit'): void {
+  public setTab(tab: 'launcher' | 'audit' | 'subscriptions'): void {
     this.activeTab = tab;
     if (tab === 'audit') {
       this.auditViewMode = 'list';
       this.loadUsers();
+    } else if (tab === 'subscriptions') {
+      this.loadSubscriptions();
+    }
+  }
+
+  public loadSubscriptions(): void {
+    this.loadingSubscriptions = true;
+    const activeCmp = this._companiesService.activeCompany();
+    const user = this._authService.currentUser();
+
+    if (activeCmp?.cmp_uuid) {
+      this._subscriptionsService.getSubscriptionsBySubscriber('COMPANY', activeCmp.cmp_uuid).subscribe({
+        next: (response: any) => {
+          this.loadingSubscriptions = false;
+          this.activeSubscriptions = response.data || [];
+        },
+        error: () => {
+          this.loadingSubscriptions = false;
+        }
+      });
+    } else if (user?.usr_uuid) {
+      this._subscriptionsService.getSubscriptionsBySubscriber('USER', user.usr_uuid).subscribe({
+        next: (response: any) => {
+          this.loadingSubscriptions = false;
+          this.activeSubscriptions = response.data || [];
+        },
+        error: () => {
+          this.loadingSubscriptions = false;
+        }
+      });
+    } else {
+      this.loadingSubscriptions = false;
     }
   }
 
