@@ -8,6 +8,7 @@ import { ApplicationsService } from '../../core/services/applications.service';
 import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
 import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
 import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
+import { TransactionsService, TransactionItem } from '../../core/services/transactions.service';
 
 interface LauncherApp {
   id: string;
@@ -111,6 +112,8 @@ export class BackofficeSuiteComponent implements OnInit {
   public loadingSubscriptions = false;
   public auditLogs: UserAuthLogItem[] = [];
   public loadingAuditLogs = false;
+  public userTransactions: TransactionItem[] = [];
+  public loadingTransactions = false;
 
   constructor(
     public _authService: AuthService,
@@ -119,6 +122,7 @@ export class BackofficeSuiteComponent implements OnInit {
     public _companiesService: CompaniesService,
     private _subscriptionsService: SubscriptionsService,
     private _userAuthLogsService: UserAuthLogsService,
+    private _transactionsService: TransactionsService,
     private fb: FormBuilder,
     private router: Router
   ) { }
@@ -192,6 +196,7 @@ export class BackofficeSuiteComponent implements OnInit {
       this.loadAuditLogs();
     } else if (tab === 'subscriptions') {
       this.loadSubscriptions();
+      this.loadTransactions();
     }
   }
 
@@ -208,6 +213,36 @@ export class BackofficeSuiteComponent implements OnInit {
         this.loadingAuditLogs = false;
       }
     });
+  }
+
+  public loadTransactions(): void {
+    this.loadingTransactions = true;
+    const activeCmp = this._companiesService.activeCompany();
+    const user = this._authService.currentUser();
+
+    if (activeCmp?.cmp_uuid) {
+      this._transactionsService.getTransactionsBySubscriber('COMPANY', activeCmp.cmp_uuid).subscribe({
+        next: (response: any) => {
+          this.loadingTransactions = false;
+          this.userTransactions = response.data || [];
+        },
+        error: () => {
+          this.loadingTransactions = false;
+        }
+      });
+    } else if (user?.usr_uuid) {
+      this._transactionsService.getTransactionsBySubscriber('USER', user.usr_uuid).subscribe({
+        next: (response: any) => {
+          this.loadingTransactions = false;
+          this.userTransactions = response.data || [];
+        },
+        error: () => {
+          this.loadingTransactions = false;
+        }
+      });
+    } else {
+      this.loadingTransactions = false;
+    }
   }
 
   public loadSubscriptions(): void {
