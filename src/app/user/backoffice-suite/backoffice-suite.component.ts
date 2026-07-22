@@ -13,6 +13,7 @@ import { SocketService } from '../../core/services/socket.service';
 
 interface LauncherApp {
   id: string;
+  app_uuid?: string;
   name: string;
   type: string;
   description: string;
@@ -35,7 +36,7 @@ interface LauncherApp {
 export class BackofficeSuiteComponent implements OnInit {
 
   // Navegación de pestañas secundarias
-  public activeTab: 'launcher' | 'audit' | 'subscriptions' = 'launcher';
+  public activeTab: 'launcher' | 'audit' | 'subscriptions' | 'applications' = 'launcher';
   
   // Vista interna de Auditoría (listado o edición Cloudflare-style)
   auditViewMode: 'list' | 'edit' = 'list';
@@ -116,6 +117,13 @@ export class BackofficeSuiteComponent implements OnInit {
   public userTransactions: TransactionItem[] = [];
   public loadingTransactions = false;
 
+  // ABM de Aplicaciones
+  public applicationsList: any[] = [];
+  public loadingApplicationsList = false;
+  public appsViewMode: 'list' | 'edit' | 'create' = 'list';
+  public selectedApp: any | null = null;
+  public appForm!: FormGroup;
+
   constructor(
     public _authService: AuthService,
     private _usersService: UsersService,
@@ -162,6 +170,7 @@ export class BackofficeSuiteComponent implements OnInit {
         if (response.success && Array.isArray(response.data) && response.data.length > 0) {
           this.launcherApps = response.data.map((app: any) => ({
             id: app.app_cod || app.app_uuid,
+            app_uuid: app.app_uuid,
             name: app.app_name,
             type: app.typeApplication?.tapp_name || app.typeApplication?.tapp_cod || 'Core',
             description: app.app_description,
@@ -209,9 +218,20 @@ export class BackofficeSuiteComponent implements OnInit {
       usr_surname: ['', [Validators.required]],
       usr_sysadmin: [false]
     });
+
+    this.appForm = this.fb.group({
+      app_cod: ['', [Validators.required]],
+      app_name: ['', [Validators.required]],
+      tapp_uuid: [''],
+      app_description: ['', [Validators.required]],
+      app_dbname: ['', [Validators.required]],
+      app_url: ['', [Validators.required]],
+      app_hasaccess: [true],
+      app_active: [true]
+    });
   }
 
-  public setTab(tab: 'launcher' | 'audit' | 'subscriptions'): void {
+  public setTab(tab: 'launcher' | 'audit' | 'subscriptions' | 'applications'): void {
     this.activeTab = tab;
     if (tab === 'audit') {
       this.auditViewMode = 'list';
@@ -220,6 +240,9 @@ export class BackofficeSuiteComponent implements OnInit {
     } else if (tab === 'subscriptions') {
       this.loadSubscriptions();
       this.loadTransactions();
+    } else if (tab === 'applications') {
+      this.appsViewMode = 'list';
+      this.loadAppsCatalog();
     }
   }
 
@@ -380,13 +403,136 @@ export class BackofficeSuiteComponent implements OnInit {
     }
   }
 
-  public launchApp(url: string): void {
-    console.log(`[Router] Redirigiendo con token SSO activo hacia: ${url}`);
-    window.open(url, '_blank');
+  public launchApp(app: LauncherApp): void {
+    if (!app.app_uuid || app.url.includes('localhost') || app.url.includes('atssuite.com.ar')) {
+      window.open(app.url, '_blank');
+      return;
+    }
+
+    console.log(`[SSO] Solicitando token de intercambio para la app: ${app.name}`);
+    this._authService.getSSOToken(app.app_uuid).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data?.token) {
+          const ssoUrl = `${app.url}/auth/sso?token=${response.data.token}`;
+          console.log(`[Router SSO] Redirigiendo hacia: ${ssoUrl}`);
+          window.open(ssoUrl, '_blank');
+        } else {
+          window.open(app.url, '_blank');
+        }
+      },
+      error: () => {
+        window.open(app.url, '_blank');
+      }
+    });
   }
 
   public logout(): void {
     this._authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+  // Métodos CRUD del ABM de Aplicaciones
+  public loadAppsCatalog(): void {
+    this.loadingApplicationsList = true;
+    this._applicationsService.getApplications().subscribe({
+      next: (response: any) => {
+        this.loadingApplicationsList = false;
+        this.applicationsList = response.data || [];
+      },
+      error: () => {
+        this.loadingApplicationsList = false;
+      }
+    });
+  }
+
+  public enterCreateAppMode(): void {
+    this.selectedApp = null;
+    this.appsViewMode = 'create';
+    this.submitted = false;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.appForm.reset({
+      app_hasaccess: true,
+      app_active: true
+    });
+  }
+
+  public enterEditAppMode(app: any): void {
+    this.selectedApp = app;
+    this.appsViewMode = 'edit';
+    this.submitted = false;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.appForm.patchValue({
+      app_cod: app.app_cod,
+      app_name: app.app_name,
+      tapp_uuid: app.tapp_uuid || '',
+      app_description: app.app_description,
+      app_dbname: app.app_dbname,
+      app_url: app.app_url,
+      app_hasaccess: !!app.app_hasaccess,
+      app_active: !!app.app_active
+    });
+  }
+
+  public exitAppMode(): void {
+    this.selectedApp = null;
+    this.appsViewMode = 'list';
+    this.appForm.reset();
+  }
+
+  public saveApplication(): void {
+    this.submitted = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.appForm.invalid) {
+      return;
+    }
+
+    this.loadingSave = true;
+    if (this.appsViewMode === 'create') {
+      this._applicationsService.saveApplication(this.appForm.value).subscribe({
+        next: () => {
+          this.loadingSave = false;
+          this.successMessage = 'Aplicación creada con éxito.';
+          this.loadAppsCatalog();
+          this.loadApplications();
+          setTimeout(() => this.exitAppMode(), 1500);
+        },
+        error: (err: any) => {
+          this.loadingSave = false;
+          this.errorMessage = err.error?.error || err.error?.message || 'Error al crear la aplicación.';
+        }
+      });
+    } else if (this.appsViewMode === 'edit' && this.selectedApp) {
+      this._applicationsService.updateApplication(this.selectedApp.app_uuid, this.appForm.value).subscribe({
+        next: () => {
+          this.loadingSave = false;
+          this.successMessage = 'Aplicación actualizada con éxito.';
+          this.loadAppsCatalog();
+          this.loadApplications();
+          setTimeout(() => this.exitAppMode(), 1500);
+        },
+        error: (err: any) => {
+          this.loadingSave = false;
+          this.errorMessage = err.error?.error || err.error?.message || 'Error al actualizar la aplicación.';
+        }
+      });
+    }
+  }
+
+  public deleteApplication(app_uuid: string): void {
+    if (confirm('¿Estás seguro de que deseas eliminar esta aplicación del catálogo?')) {
+      this._applicationsService.deleteApplication(app_uuid).subscribe({
+        next: () => {
+          this.loadAppsCatalog();
+          this.loadApplications();
+        },
+        error: () => {
+          this.errorMessage = 'No se pudo eliminar la aplicación seleccionada.';
+        }
+      });
+    }
   }
 }
