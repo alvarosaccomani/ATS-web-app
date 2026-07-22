@@ -84,6 +84,10 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
+  public getSSOToken(app_uuid: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}auth/sso/token`, { app_uuid });
+  }
+
   public isLoggedIn(): boolean {
     return this.currentUser() !== null;
   }
