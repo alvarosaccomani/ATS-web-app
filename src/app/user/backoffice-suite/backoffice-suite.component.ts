@@ -9,6 +9,7 @@ import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../co
 import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
 import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
 import { TransactionsService, TransactionItem } from '../../core/services/transactions.service';
+import { SocketService } from '../../core/services/socket.service';
 
 interface LauncherApp {
   id: string;
@@ -123,6 +124,7 @@ export class BackofficeSuiteComponent implements OnInit {
     private _subscriptionsService: SubscriptionsService,
     private _userAuthLogsService: UserAuthLogsService,
     private _transactionsService: TransactionsService,
+    private _socketService: SocketService,
     private fb: FormBuilder,
     private router: Router
   ) { }
@@ -131,6 +133,27 @@ export class BackofficeSuiteComponent implements OnInit {
     this.initForm();
     this.loadApplications();
     this.loadUserCompanies();
+    this.setupSocketListeners();
+  }
+
+  private setupSocketListeners(): void {
+    // Escuchar creación y eliminación de usuarios
+    this._socketService.onEvent<any>('user_created').subscribe(() => {
+      this.loadUsers();
+    });
+    this._socketService.onEvent<any>('user_deleted').subscribe(() => {
+      this.loadUsers();
+    });
+
+    // Escuchar creación de logs de auditoría de autenticación
+    this._socketService.onEvent<any>('auth_log_created').subscribe(() => {
+      this.loadAuditLogs();
+    });
+
+    // Escuchar transacciones de pago en tiempo real
+    this._socketService.onEvent<any>('transaction_created').subscribe(() => {
+      this.loadTransactions();
+    });
   }
 
   public loadApplications(): void {
