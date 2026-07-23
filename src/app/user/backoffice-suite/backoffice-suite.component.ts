@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -134,7 +134,8 @@ export class BackofficeSuiteComponent implements OnInit {
     private _transactionsService: TransactionsService,
     private _socketService: SocketService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -248,21 +249,25 @@ export class BackofficeSuiteComponent implements OnInit {
 
   public loadAuditLogs(): void {
     this.loadingAuditLogs = true;
+    this.cdr.detectChanges();
     this._userAuthLogsService.getUserAuthLogs().subscribe({
       next: (response: any) => {
         this.loadingAuditLogs = false;
         if (response.success && Array.isArray(response.data)) {
           this.auditLogs = response.data;
         }
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingAuditLogs = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   public loadTransactions(): void {
     this.loadingTransactions = true;
+    this.cdr.detectChanges();
     const activeCmp = this._companiesService.activeCompany();
     const user = this._authService.currentUser();
 
@@ -271,9 +276,11 @@ export class BackofficeSuiteComponent implements OnInit {
         next: (response: any) => {
           this.loadingTransactions = false;
           this.userTransactions = response.data || [];
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loadingTransactions = false;
+          this.cdr.detectChanges();
         }
       });
     } else if (user?.usr_uuid) {
@@ -281,18 +288,22 @@ export class BackofficeSuiteComponent implements OnInit {
         next: (response: any) => {
           this.loadingTransactions = false;
           this.userTransactions = response.data || [];
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loadingTransactions = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
       this.loadingTransactions = false;
+      this.cdr.detectChanges();
     }
   }
 
   public loadSubscriptions(): void {
     this.loadingSubscriptions = true;
+    this.cdr.detectChanges();
     const activeCmp = this._companiesService.activeCompany();
     const user = this._authService.currentUser();
 
@@ -301,9 +312,11 @@ export class BackofficeSuiteComponent implements OnInit {
         next: (response: any) => {
           this.loadingSubscriptions = false;
           this.activeSubscriptions = response.data || [];
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loadingSubscriptions = false;
+          this.cdr.detectChanges();
         }
       });
     } else if (user?.usr_uuid) {
@@ -311,19 +324,23 @@ export class BackofficeSuiteComponent implements OnInit {
         next: (response: any) => {
           this.loadingSubscriptions = false;
           this.activeSubscriptions = response.data || [];
+          this.cdr.detectChanges();
         },
         error: () => {
           this.loadingSubscriptions = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
       this.loadingSubscriptions = false;
+      this.cdr.detectChanges();
     }
   }
 
   public loadUsers(): void {
     this.loadingUsers = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
     this._usersService.getUsers().subscribe({
       next: (response: any) => {
         this.loadingUsers = false;
@@ -332,10 +349,12 @@ export class BackofficeSuiteComponent implements OnInit {
         } else {
           this.usersList = response.data || [];
         }
+        this.cdr.detectChanges();
       },
       error: (error: any) => {
         this.loadingUsers = false;
         this.errorMessage = 'No se pudo recuperar los usuarios de la base de datos.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -354,12 +373,14 @@ export class BackofficeSuiteComponent implements OnInit {
       usr_surname: user.usr_surname,
       usr_sysadmin: !!user.usr_sysadmin
     });
+    this.cdr.detectChanges();
   }
 
   public exitEditMode(): void {
     this.selectedUser = null;
     this.auditViewMode = 'list';
     this.editForm.reset();
+    this.cdr.detectChanges();
   }
 
   public saveEditedUser(): void {
@@ -372,10 +393,12 @@ export class BackofficeSuiteComponent implements OnInit {
     }
 
     this.loadingSave = true;
+    this.cdr.detectChanges();
     this._usersService.updateUser(this.selectedUser.usr_uuid, this.editForm.value).subscribe({
       next: (response: any) => {
         this.loadingSave = false;
         this.successMessage = 'Usuario actualizado correctamente.';
+        this.cdr.detectChanges();
         this.loadUsers();
         
         // Retornar a la vista principal después de 1.5s
@@ -386,6 +409,7 @@ export class BackofficeSuiteComponent implements OnInit {
       error: (error: any) => {
         this.loadingSave = false;
         this.errorMessage = error.error?.error || error.error?.message || 'Ocurrió un error al intentar actualizar el usuario.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -395,9 +419,11 @@ export class BackofficeSuiteComponent implements OnInit {
       this._usersService.deleteUser(usr_uuid).subscribe({
         next: () => {
           this.loadUsers();
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = 'No se pudo eliminar el usuario seleccionado.';
+          this.cdr.detectChanges();
         }
       });
     }
@@ -431,16 +457,21 @@ export class BackofficeSuiteComponent implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 
-  // Métodos CRUD del ABM de Aplicaciones
   public loadAppsCatalog(): void {
+    console.log('[loadAppsCatalog] Iniciando carga de catálogo de aplicaciones...');
     this.loadingApplicationsList = true;
     this._applicationsService.getApplications().subscribe({
       next: (response: any) => {
+        console.log('[loadAppsCatalog] Respuesta exitosa recibida:', response);
         this.loadingApplicationsList = false;
         this.applicationsList = response.data || [];
+        console.log('[loadAppsCatalog] loadingApplicationsList seteado a false. Cantidad de apps:', this.applicationsList.length);
+        this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err: any) => {
+        console.error('[loadAppsCatalog] Error al cargar catálogo de aplicaciones:', err);
         this.loadingApplicationsList = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -455,6 +486,7 @@ export class BackofficeSuiteComponent implements OnInit {
       app_hasaccess: true,
       app_active: true
     });
+    this.cdr.detectChanges();
   }
 
   public enterEditAppMode(app: any): void {
@@ -473,12 +505,14 @@ export class BackofficeSuiteComponent implements OnInit {
       app_hasaccess: !!app.app_hasaccess,
       app_active: !!app.app_active
     });
+    this.cdr.detectChanges();
   }
 
   public exitAppMode(): void {
     this.selectedApp = null;
     this.appsViewMode = 'list';
     this.appForm.reset();
+    this.cdr.detectChanges();
   }
 
   public saveApplication(): void {
@@ -491,6 +525,7 @@ export class BackofficeSuiteComponent implements OnInit {
     }
 
     this.loadingSave = true;
+    this.cdr.detectChanges();
     if (this.appsViewMode === 'create') {
       this._applicationsService.saveApplication(this.appForm.value).subscribe({
         next: () => {
@@ -498,11 +533,13 @@ export class BackofficeSuiteComponent implements OnInit {
           this.successMessage = 'Aplicación creada con éxito.';
           this.loadAppsCatalog();
           this.loadApplications();
+          this.cdr.detectChanges();
           setTimeout(() => this.exitAppMode(), 1500);
         },
         error: (err: any) => {
           this.loadingSave = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Error al crear la aplicación.';
+          this.cdr.detectChanges();
         }
       });
     } else if (this.appsViewMode === 'edit' && this.selectedApp) {
@@ -512,11 +549,13 @@ export class BackofficeSuiteComponent implements OnInit {
           this.successMessage = 'Aplicación actualizada con éxito.';
           this.loadAppsCatalog();
           this.loadApplications();
+          this.cdr.detectChanges();
           setTimeout(() => this.exitAppMode(), 1500);
         },
         error: (err: any) => {
           this.loadingSave = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Error al actualizar la aplicación.';
+          this.cdr.detectChanges();
         }
       });
     }
@@ -528,9 +567,11 @@ export class BackofficeSuiteComponent implements OnInit {
         next: () => {
           this.loadAppsCatalog();
           this.loadApplications();
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = 'No se pudo eliminar la aplicación seleccionada.';
+          this.cdr.detectChanges();
         }
       });
     }
