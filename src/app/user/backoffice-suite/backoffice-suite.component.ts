@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService, UserSession } from '../../core/services/auth.service';
 import { UsersService } from '../../core/services/users.service';
 import { ApplicationsService } from '../../core/services/applications.service';
+import { TypeApplicationsService } from '../../core/services/type-applications.service';
 import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
 import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
 import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
@@ -53,60 +54,6 @@ export class BackofficeSuiteComponent implements OnInit {
 
   // Listado estático de las apps mapeadas desde el Core con sus permisos específicos
   launcherApps: LauncherApp[] = [
-    {
-      id: 'Central',
-      name: 'ATS Core Central',
-      type: 'Core',
-      description: 'Panel maestro de configuración global, administración de planes cruzados y auditoría de federación.',
-      dbName: 'db_shared_kernel',
-      url: 'https://central.tuplataforma.com',
-      hasAccess: true
-    },
-    {
-      id: 'Community',
-      name: 'ATS Community',
-      type: 'B2B',
-      description: 'Gestión de unidades funcionales, reserva de áreas comunes y canalización activa de reclamos para barrios.',
-      dbName: 'db_atscommunity',
-      url: 'https://comunidad.tuplataforma.com',
-      hasAccess: true
-    },
-    {
-      id: 'Works',
-      name: 'ATS Works',
-      type: 'B2B',
-      description: 'Control operacional técnico. Generación de planillas de mantenimiento y asignación de operarios externos.',
-      dbName: 'db_atsworks',
-      url: 'https://works.tuplataforma.com',
-      hasAccess: true
-    },
-    {
-      id: 'Market',
-      name: 'ATS Market',
-      type: 'B2C',
-      description: 'E-commerce integrado con carrito de compras y control avanzado de stock para suministros locales.',
-      dbName: 'db_atsmarket',
-      url: 'https://market.tuplataforma.com',
-      hasAccess: false
-    },
-    {
-      id: 'Management',
-      name: 'ATS Management',
-      type: 'Fintech',
-      description: 'Procesamiento, auditoría y conciliación automática de cupones de tarjetas de crédito y expensas.',
-      dbName: 'db_atsmanagement',
-      url: 'https://management.tuplataforma.com',
-      hasAccess: false
-    },
-    {
-      id: 'GUVA',
-      name: 'GUVA',
-      type: 'B2C',
-      description: 'Motor inteligente e indexado para la búsqueda y contratación de proveedores profesionales validados.',
-      dbName: 'db_guva',
-      url: 'https://guva.tuplataforma.com',
-      hasAccess: true
-    }
   ];
 
   public userCompanies: UserCompanyRelationItem[] = [];
@@ -123,6 +70,8 @@ export class BackofficeSuiteComponent implements OnInit {
   public appsViewMode: 'list' | 'edit' | 'create' = 'list';
   public selectedApp: any | null = null;
   public appForm!: FormGroup;
+  public typeApplicationsList: any[] = [];
+  public loadingTypeApps = false;
 
   constructor(
     public _authService: AuthService,
@@ -133,6 +82,7 @@ export class BackofficeSuiteComponent implements OnInit {
     private _userAuthLogsService: UserAuthLogsService,
     private _transactionsService: TransactionsService,
     private _socketService: SocketService,
+    private _typeApplicationsService: TypeApplicationsService,
     private fb: FormBuilder,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -223,7 +173,7 @@ export class BackofficeSuiteComponent implements OnInit {
     this.appForm = this.fb.group({
       app_cod: ['', [Validators.required]],
       app_name: ['', [Validators.required]],
-      tapp_uuid: [''],
+      tapp_uuid: ['', [Validators.required]],
       app_description: ['', [Validators.required]],
       app_dbname: ['', [Validators.required]],
       app_url: ['', [Validators.required]],
@@ -244,6 +194,7 @@ export class BackofficeSuiteComponent implements OnInit {
     } else if (tab === 'applications') {
       this.appsViewMode = 'list';
       this.loadAppsCatalog();
+      this.loadTypeApplications();
     }
   }
 
@@ -575,5 +526,20 @@ export class BackofficeSuiteComponent implements OnInit {
         }
       });
     }
+  }
+
+  public loadTypeApplications(): void {
+    this.loadingTypeApps = true;
+    this._typeApplicationsService.getTypeApplications().subscribe({
+      next: (response: any) => {
+        this.loadingTypeApps = false;
+        this.typeApplicationsList = response.data || [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingTypeApps = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

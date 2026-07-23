@@ -690,12 +690,12 @@
         <form [formGroup]="appForm" (ngSubmit)="saveApplication()" class="p-4">
           
           <!-- SECCIÓN 1: DATOS GENERALES -->
-          <div class="row g-4 mb-4">
+          <div class="row g-4">
             <div class="col-12">
               <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">1. Datos de Identificación</h4>
             </div>
             
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <label for="app_cod" class="form-label small fw-bold text-dark">Código de la App (Cod)</label>
               <input type="text" id="app_cod" formControlName="app_cod" class="form-control px-3 py-2 rounded-3 text-sm"
                      [ngClass]="{ 'is-invalid': submitted && appForm.get('app_cod')?.errors }" placeholder="ej: GUVA"/>
@@ -704,7 +704,7 @@
               </div>
             </div>
 
-            <div class="col-12 col-md-8">
+            <div class="col-12 col-md-5">
               <label for="app_name" class="form-label small fw-bold text-dark">Nombre Público</label>
               <input type="text" id="app_name" formControlName="app_name" class="form-control px-3 py-2 rounded-3 text-sm"
                      [ngClass]="{ 'is-invalid': submitted && appForm.get('app_name')?.errors }" placeholder="ej: GUVA Profesionales"/>
@@ -712,10 +712,26 @@
                 El nombre público es obligatorio.
               </div>
             </div>
+
+            <div class="col-12 col-md-4">
+              <label for="tapp_uuid" class="form-label small fw-bold text-dark">Tipo de Aplicación</label>
+              <select id="tapp_uuid" formControlName="tapp_uuid" class="form-select px-3 py-2 rounded-3 text-sm"
+                      [ngClass]="{ 'is-invalid': submitted && appForm.get('tapp_uuid')?.errors }">
+                <option value="" disabled selected>Seleccioná un tipo...</option>
+                <option *ngFor="let type of typeApplicationsList" [value]="type.tapp_uuid">
+                  {{ type.tapp_name }} ({{ type.tapp_cod }})
+                </option>
+              </select>
+              <div *ngIf="submitted && appForm.get('tapp_uuid')?.errors?.['required']" class="invalid-feedback small">
+                El tipo de aplicación es obligatorio.
+              </div>
+            </div>
           </div>
 
+          <hr class="my-4 opacity-25">
+
           <!-- SECCIÓN 2: BASE DE DATOS Y URL -->
-          <div class="row g-4 mb-4 border-top pt-4">
+          <div class="row g-4">
             <div class="col-12">
               <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">2. Endpoint y Conexión</h4>
             </div>
@@ -739,8 +755,10 @@
             </div>
           </div>
 
+          <hr class="my-4 opacity-25">
+
           <!-- SECCIÓN 3: DESCRIPCIÓN -->
-          <div class="row g-4 mb-4 border-top pt-4">
+          <div class="row g-4">
             <div class="col-12">
               <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">3. Descripción</h4>
             </div>
@@ -755,8 +773,10 @@
             </div>
           </div>
 
+          <hr class="my-4 opacity-25">
+
           <!-- SECCIÓN 4: CONTROL DE ACCESO / ESTADO -->
-          <div class="row g-4 mb-4 border-top pt-4">
+          <div class="row g-4">
             <div class="col-12">
               <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">4. Visibilidad y Estado</h4>
             </div>
