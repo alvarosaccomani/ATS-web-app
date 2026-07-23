@@ -23,22 +23,22 @@ export class TypeApplicationsService {
   ) { }
 
   public getTypeApplications(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}typeapplications`);
+    return this.http.get<any>(`${environment.apiUrl}type-applications`);
   }
 
   public getTypeApplicationById(tapp_uuid: string): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}typeapplication/${tapp_uuid}`);
+    return this.http.get<any>(`${environment.apiUrl}type-application/${tapp_uuid}`);
   }
 
   public saveTypeApplication(typeAppData: any): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}typeapplication`, typeAppData);
+    return this.http.post<any>(`${environment.apiUrl}type-application`, typeAppData);
   }
 
   public updateTypeApplication(tapp_uuid: string, typeAppData: any): Observable<any> {
-    return this.http.put<any>(`${environment.apiUrl}typeapplication/${tapp_uuid}`, typeAppData);
+    return this.http.put<any>(`${environment.apiUrl}type-application/${tapp_uuid}`, typeAppData);
   }
 
   public deleteTypeApplication(tapp_uuid: string): Observable<any> {
-    return this.http.delete<any>(`${environment.apiUrl}typeapplication/${tapp_uuid}`);
+    return this.http.delete<any>(`${environment.apiUrl}type-application/${tapp_uuid}`);
   }
 }
