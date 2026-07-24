@@ -381,7 +381,7 @@ export class BackofficeSuiteComponent implements OnInit {
   }
 
   public launchApp(app: LauncherApp): void {
-    if (!app.app_uuid || app.url.includes('localhost') || app.url.includes('atssuite.com.ar')) {
+    if (!app.app_uuid) {
       window.open(app.url, '_blank');
       return;
     }
