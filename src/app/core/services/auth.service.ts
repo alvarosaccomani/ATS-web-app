@@ -88,6 +88,33 @@ export class AuthService {
     return this.http.post<any>(`${environment.apiUrl}auth/sso/token`, { app_uuid });
   }
 
+  public verifySSOToken(ssoToken: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}auth/sso/verify`, { sso_token: ssoToken }).pipe(
+      tap(response => {
+        if (response.success && response.data) {
+          const user = response.data.user;
+          const token = response.data.token;
+          const domain = getSharedDomain();
+          
+          if (token) {
+            setCookie('ats_token', token, 7, domain);
+          }
+          
+          const sessionUser: UserSession = {
+            usr_uuid: user.usr_uuid,
+            usr_email: user.usr_email,
+            usr_name: user.usr_name,
+            usr_surname: user.usr_surname,
+            usr_sysadmin: !!user.usr_sysadmin
+          };
+          
+          setCookie('ats_user', encodeURIComponent(JSON.stringify(sessionUser)), 7, domain);
+          this.currentUser.set(sessionUser);
+        }
+      })
+    );
+  }
+
   public isLoggedIn(): boolean {
     return this.currentUser() !== null;
   }
