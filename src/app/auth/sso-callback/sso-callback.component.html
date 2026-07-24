@@ -1,1 +1,39 @@
-<p>sso-callback works!</p>
+<div class="sso-container">
+  <div class="sso-card">
+    
+    <!-- ESTADO: CARGANDO / VERIFICANDO -->
+    <div *ngIf="status === 'loading'">
+      <div class="custom-spinner"></div>
+      <h3 class="title">Verificando credenciales</h3>
+      <p class="description">Estableciendo conexión federada segura con el Kernel Central de ATS...</p>
+    </div>
+
+    <!-- ESTADO: ÉXITO -->
+    <div *ngIf="status === 'success'">
+      <div class="status-circle success">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 class="title">Autenticación exitosa</h3>
+      <p class="description">Identidad confirmada. Redirigiéndote de forma segura...</p>
+    </div>
+
+    <!-- ESTADO: ERROR -->
+    <div *ngIf="status === 'error'">
+      <div class="status-circle error">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h3 class="title">Error de Federación SSO</h3>
+      <div class="error-text">{{ errorMessage }}</div>
+      <button (click)="retryLogin()" class="btn-action">
+        Volver a Iniciar Sesión
+      </button>
+    </div>
+
+  </div>
+</div>

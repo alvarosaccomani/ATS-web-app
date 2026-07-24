@@ -1,0 +1,171 @@
+.sso-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 50%, #0a1128 0%, #020617 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  // Subtle glowing backdrop elements
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  &::before {
+    background: #3b82f6;
+    top: 20%;
+    left: 20%;
+  }
+
+  &::after {
+    background: #8b5cf6;
+    bottom: 20%;
+    right: 20%;
+  }
+}
+
+.sso-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 3.5rem 3rem;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+// Custom animated spinner
+.custom-spinner {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 30%, #3b82f6 100%);
+  position: relative;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    background: #020617;
+    border-radius: 50%;
+  }
+}
+
+// Success and Error glowing circles
+.status-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 2rem;
+
+  &.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
+    animation: pulse-success 2s infinite;
+  }
+
+  &.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.25);
+    animation: pulse-error 2s infinite;
+  }
+}
+
+// Text updates
+.title {
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.error-text {
+  color: #f87171;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  background: rgba(239, 68, 68, 0.08);
+  padding: 0.85rem 1.15rem;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  margin-top: 0.5rem;
+  margin-bottom: 2rem;
+  word-break: break-word;
+}
+
+// Button styling
+.btn-action {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-success {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+  70% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulse-error {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+  70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
