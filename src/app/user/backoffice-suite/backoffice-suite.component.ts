@@ -167,7 +167,8 @@ export class BackofficeSuiteComponent implements OnInit {
       usr_email: ['', [Validators.required, Validators.email]],
       usr_name: ['', [Validators.required]],
       usr_surname: ['', [Validators.required]],
-      usr_sysadmin: [false]
+      usr_sysadmin: [false],
+      usr_confirmed: [false]
     });
 
     this.appForm = this.fb.group({
@@ -322,7 +323,8 @@ export class BackofficeSuiteComponent implements OnInit {
       usr_email: user.usr_email,
       usr_name: user.usr_name,
       usr_surname: user.usr_surname,
-      usr_sysadmin: !!user.usr_sysadmin
+      usr_sysadmin: !!user.usr_sysadmin,
+      usr_confirmed: !!user.usr_confirmed
     });
     this.cdr.detectChanges();
   }
