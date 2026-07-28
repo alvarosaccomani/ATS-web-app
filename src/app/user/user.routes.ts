@@ -5,6 +5,7 @@ import { UserLayoutComponent } from './user-layout/user-layout.component';
 import { BackofficeSuiteComponent } from './backoffice-suite/backoffice-suite.component';
 import { LauncherTabComponent } from './launcher-tab/launcher-tab.component';
 import { AuditTabComponent } from './audit-tab/audit-tab.component';
+import { SubscriptionsTabComponent } from './subscriptions-tab/subscriptions-tab.component';
 
 export const USER_ROUTES: Routes = [
     {
@@ -14,7 +15,8 @@ export const USER_ROUTES: Routes = [
         children: [
             { path: 'backoffice-suite', component: BackofficeSuiteComponent},
             { path: 'backoffice-suite/launcher', component: LauncherTabComponent},
-            { path: 'backoffice-suite/audit', component: AuditTabComponent}
+            { path: 'backoffice-suite/audit', component: AuditTabComponent},
+            { path: 'backoffice-suite/subscriptions', component: SubscriptionsTabComponent}
         ]
     }
 ];
