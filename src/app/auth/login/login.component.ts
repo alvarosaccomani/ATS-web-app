@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -23,7 +23,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -50,9 +51,47 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(credentials).subscribe({
       next: (res) => {
-        this.loading = false;
-        // Redirigir a la landing page o al dashboard tras un login exitoso
-        this.router.navigate(['/user/backoffice-suite']);
+        const redirectUrl = this.route.snapshot.queryParamMap.get('redirect');
+        const appCod = this.route.snapshot.queryParamMap.get('app_cod');
+
+        if (redirectUrl && appCod) {
+          // Obtener configuración de la aplicación para extraer su app_uuid
+          this.authService.getAppConfig(appCod).subscribe({
+            next: (configRes) => {
+              if (configRes.success && configRes.app_uuid) {
+                // Generar token SSO para esa aplicación
+                this.authService.getSSOToken(configRes.app_uuid).subscribe({
+                  next: (tokenRes) => {
+                    this.loading = false;
+                    if (tokenRes.success && tokenRes.data?.token) {
+                      // Redirigir al callback SSO del satélite
+                      window.location.href = `${redirectUrl}?token=${tokenRes.data.token}`;
+                    } else {
+                      this.router.navigate(['/user/backoffice-suite']);
+                    }
+                  },
+                  error: (err) => {
+                    this.loading = false;
+                    console.error('Error al generar token SSO:', err);
+                    this.router.navigate(['/user/backoffice-suite']);
+                  }
+                });
+              } else {
+                this.loading = false;
+                this.router.navigate(['/user/backoffice-suite']);
+              }
+            },
+            error: (err) => {
+              this.loading = false;
+              console.error('Error al obtener config de app:', err);
+              this.router.navigate(['/user/backoffice-suite']);
+            }
+          });
+        } else {
+          this.loading = false;
+          // Redirigir a la landing page o al dashboard tras un login exitoso
+          this.router.navigate(['/user/backoffice-suite']);
+        }
       },
       error: (err) => {
         this.loading = false;
