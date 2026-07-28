@@ -84,6 +84,10 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
+  public getAppConfig(app_cod: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}auth/sso/config/${app_cod}`);
+  }
+
   public getSSOToken(app_uuid: string): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}auth/sso/token`, { app_uuid });
   }
