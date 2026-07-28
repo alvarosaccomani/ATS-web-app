@@ -1,1 +1,230 @@
-<p>applications-tab works!</p>
+<div class="animate-fade-in" *ngIf="_authService.currentUser() as user">
+  
+  <!-- CABECERA DE SECCIÓN -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="h5 fw-bold mb-1" style="color: #0A2540;">⚙️ Configuración del Ecosistema</h2>
+      <p class="text-muted small mb-0">Administración de aplicaciones satélites integradas, base de datos y federación SSO.</p>
+    </div>
+    <button *ngIf="appsViewMode === 'list'" (click)="enterCreateAppMode()" class="btn text-white px-3 py-2 rounded-3 fw-semibold small shadow-sm d-flex align-items-center gap-1.5" style="background-color: #0A2540;">
+      <span>＋</span> Agregar Aplicación
+    </button>
+  </div>
+
+  <!-- LISTADO PLANO (ESTILO CLOUDFLARE TABLE) -->
+  <div *ngIf="appsViewMode === 'list'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+    <div *ngIf="loadingApplicationsList" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando aplicaciones...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loadingApplicationsList && applicationsList.length === 0" class="p-5 text-center text-muted small">
+      No hay aplicaciones dadas de alta en el sistema.
+    </div>
+
+    <div *ngIf="!loadingApplicationsList && applicationsList.length > 0" class="table-responsive">
+      <table class="table table-hover align-middle mb-0 text-sm">
+        <thead class="bg-light text-muted font-monospace small" style="font-size: 0.75rem;">
+          <tr>
+            <th class="ps-4">CÓDIGO</th>
+            <th>NOMBRE</th>
+            <th>BASE DE DATOS</th>
+            <th>URL DE ACCESO</th>
+            <th>LANZADOR</th>
+            <th>ESTADO</th>
+            <th class="pe-4 text-end">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of applicationsList">
+            <td class="ps-4 font-monospace fw-bold text-secondary">
+              {{ app.app_cod }}
+            </td>
+            <td>
+              <div class="fw-semibold text-dark">{{ app.app_name }}</div>
+              <small class="text-muted d-block text-truncate" style="max-width: 240px; font-size: 0.7rem;">{{ app.app_description }}</small>
+            </td>
+            <td class="font-monospace text-secondary small">
+              {{ app.app_dbname }}
+            </td>
+            <td>
+              <a [href]="app.app_url" target="_blank" class="text-primary text-decoration-none small d-flex align-items-center gap-1">
+                {{ app.app_url }} <span style="font-size: 0.65rem;">↗</span>
+              </a>
+            </td>
+            <td>
+              <span class="badge rounded-pill px-2.5 py-1 small"
+                    [ngClass]="app.app_hasaccess ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20' : 'bg-light text-muted border'">
+                {{ app.app_hasaccess ? 'Incluido' : 'Oculto' }}
+              </span>
+            </td>
+            <td>
+              <span class="badge rounded-pill px-2.5 py-1 small"
+                    [ngClass]="app.app_active ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20'">
+                {{ app.app_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="pe-4 text-end">
+              <div class="d-inline-flex gap-2">
+                <button (click)="enterEditAppMode(app)" class="btn btn-light btn-xs border rounded-3 fw-semibold text-secondary px-2.5 py-1 small" style="font-size: 0.75rem;">
+                  Editar
+                </button>
+                <button (click)="deleteApplication(app.app_uuid)" class="btn btn-light btn-xs border border-danger-subtle text-danger rounded-3 fw-semibold px-2.5 py-1 small" style="font-size: 0.75rem;">
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORMULARIO INTEGRADO INLINE (ESTILO CLOUDFLARE CARD) -->
+  <div *ngIf="appsViewMode === 'create' || appsViewMode === 'edit'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden animate-fade-in">
+    <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
+      <h3 class="h6 fw-bold mb-0 text-dark">
+        {{ appsViewMode === 'create' ? 'Crear Nueva Aplicación' : 'Configurar ' + selectedApp?.app_name }}
+      </h3>
+      <button (click)="exitAppMode()" class="btn btn-light btn-sm border rounded-3 fw-semibold text-secondary small px-3 py-1.5">
+        &larr; Volver al listado
+      </button>
+    </div>
+
+    <form [formGroup]="appForm" (ngSubmit)="saveApplication()" class="p-4">
+      
+      <!-- SECCIÓN 1: DATOS GENERALES -->
+      <div class="row g-4">
+        <div class="col-12">
+          <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">1. Datos de Identificación</h4>
+        </div>
+        
+        <div class="col-12 col-md-3">
+          <label for="app_cod" class="form-label small fw-bold text-dark">Código de la App (Cod)</label>
+          <input type="text" id="app_cod" formControlName="app_cod" class="form-control px-3 py-2 rounded-3 text-sm"
+                 [ngClass]="{ 'is-invalid': submitted && appForm.get('app_cod')?.errors }" placeholder="ej: GUVA"/>
+          <div *ngIf="submitted && appForm.get('app_cod')?.errors?.['required']" class="invalid-feedback small">
+            El código de la aplicación es obligatorio.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-5">
+          <label for="app_name" class="form-label small fw-bold text-dark">Nombre Público</label>
+          <input type="text" id="app_name" formControlName="app_name" class="form-control px-3 py-2 rounded-3 text-sm"
+                 [ngClass]="{ 'is-invalid': submitted && appForm.get('app_name')?.errors }" placeholder="ej: GUVA Profesionales"/>
+          <div *ngIf="submitted && appForm.get('app_name')?.errors?.['required']" class="invalid-feedback small">
+            El nombre público es obligatorio.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="tapp_uuid" class="form-label small fw-bold text-dark">Tipo de Aplicación</label>
+          <select id="tapp_uuid" formControlName="tapp_uuid" class="form-select px-3 py-2 rounded-3 text-sm"
+                  [ngClass]="{ 'is-invalid': submitted && appForm.get('tapp_uuid')?.errors }">
+            <option value="" disabled selected>Seleccioná un tipo...</option>
+            <option *ngFor="let type of typeApplicationsList" [value]="type.tapp_uuid">
+              {{ type.tapp_name }} ({{ type.tapp_cod }})
+            </option>
+          </select>
+          <div *ngIf="submitted && appForm.get('tapp_uuid')?.errors?.['required']" class="invalid-feedback small">
+            El tipo de aplicación es obligatorio.
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4 opacity-25">
+
+      <!-- SECCIÓN 2: BASE DE DATOS Y URL -->
+      <div class="row g-4">
+        <div class="col-12">
+          <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">2. Endpoint y Conexión</h4>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="app_dbname" class="form-label small fw-bold text-dark">Base de Datos Asociada</label>
+          <input type="text" id="app_dbname" formControlName="app_dbname" class="form-control px-3 py-2 rounded-3 text-sm font-monospace"
+                 [ngClass]="{ 'is-invalid': submitted && appForm.get('app_dbname')?.errors }" placeholder="ej: guva_prod_db"/>
+          <div *ngIf="submitted && appForm.get('app_dbname')?.errors?.['required']" class="invalid-feedback small">
+            El nombre de la base de datos es obligatorio.
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label for="app_url" class="form-label small fw-bold text-dark">URL de Acceso</label>
+          <input type="text" id="app_url" formControlName="app_url" class="form-control px-3 py-2 rounded-3 text-sm font-monospace"
+                 [ngClass]="{ 'is-invalid': submitted && appForm.get('app_url')?.errors }" placeholder="ej: https://guva.com.ar"/>
+          <div *ngIf="submitted && appForm.get('app_url')?.errors?.['required']" class="invalid-feedback small">
+            La URL de acceso es obligatoria.
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4 opacity-25">
+
+      <!-- SECCIÓN 3: DESCRIPCIÓN -->
+      <div class="row g-4">
+        <div class="col-12">
+          <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">3. Descripción</h4>
+        </div>
+
+        <div class="col-12">
+          <label for="app_description" class="form-label small fw-bold text-dark">Propósito de la aplicación</label>
+          <textarea id="app_description" formControlName="app_description" rows="3" class="form-control px-3 py-2 rounded-3 text-sm"
+                    [ngClass]="{ 'is-invalid': submitted && appForm.get('app_description')?.errors }" placeholder="Describí brevemente la función de este módulo..."></textarea>
+          <div *ngIf="submitted && appForm.get('app_description')?.errors?.['required']" class="invalid-feedback small">
+            La descripción es obligatoria.
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4 opacity-25">
+
+      <!-- SECCIÓN 4: CONTROL DE ACCESO / ESTADO -->
+      <div class="row g-4">
+        <div class="col-12">
+          <h4 class="small fw-extrabold text-uppercase text-muted tracking-wider mb-3">4. Visibilidad y Estado</h4>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-check form-switch card border p-3 rounded-3 d-flex flex-row align-items-center justify-content-between">
+            <div class="me-3">
+              <label for="app_hasaccess" class="form-check-label fw-bold text-dark small d-block">Incluir en Lanzador</label>
+              <span class="text-muted small" style="font-size: 0.7rem;">Determina si la app se muestra en el inicio general de la suite.</span>
+            </div>
+            <input type="checkbox" id="app_hasaccess" formControlName="app_hasaccess" class="form-check-input" style="width: 2.8em; height: 1.4em; cursor: pointer;"/>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="form-check form-switch card border p-3 rounded-3 d-flex flex-row align-items-center justify-content-between">
+            <div class="me-3">
+              <label for="app_active" class="form-check-label fw-bold text-dark small d-block">Estado Operacional</label>
+              <span class="text-muted small" style="font-size: 0.7rem;">Permite habilitar o inhabilitar por completo el sistema satélite.</span>
+            </div>
+            <input type="checkbox" id="app_active" formControlName="app_active" class="form-check-input" style="width: 2.8em; height: 1.4em; cursor: pointer;"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTAS Y BOTONES DE CONTROL -->
+      <div class="border-top pt-4 mt-4 d-flex justify-content-between align-items-center">
+        <div>
+          <div *ngIf="errorMessage" class="alert alert-danger px-3 py-2 rounded-3 small mb-0">{{ errorMessage }}</div>
+          <div *ngIf="successMessage" class="alert alert-success px-3 py-2 rounded-3 small mb-0">{{ successMessage }}</div>
+        </div>
+
+        <div class="d-inline-flex gap-3">
+          <button type="button" (click)="exitAppMode()" class="btn btn-light px-4 py-2 rounded-3 fw-semibold small border">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="loadingSave" class="btn text-white px-4 py-2 rounded-3 fw-semibold small shadow-sm" style="background-color: #0A2540;">
+            <span *ngIf="loadingSave" class="spinner-border spinner-border-sm me-1.5" role="status"></span>
+            Guardar Configuración
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

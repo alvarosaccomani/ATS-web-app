@@ -14,11 +14,17 @@ export const USER_ROUTES: Routes = [
         component: UserLayoutComponent,
         canActivate: [authGuard],
         children: [
-            { path: 'backoffice-suite', component: BackofficeSuiteComponent},
-            { path: 'backoffice-suite/launcher', component: LauncherTabComponent},
-            { path: 'backoffice-suite/audit', component: AuditTabComponent},
-            { path: 'backoffice-suite/subscriptions', component: SubscriptionsTabComponent},
-            { path: 'backoffice-suite/applications', component: ApplicationsTabComponent}
+            { 
+                path: 'backoffice-suite', 
+                component: BackofficeSuiteComponent,
+                children: [
+                    { path: '', redirectTo: 'launcher', pathMatch: 'full' },
+                    { path: 'launcher', component: LauncherTabComponent },
+                    { path: 'audit', component: AuditTabComponent },
+                    { path: 'subscriptions', component: SubscriptionsTabComponent },
+                    { path: 'applications', component: ApplicationsTabComponent }
+                ]
+            }
         ]
     }
 ];

@@ -1,1 +1,264 @@
-<p>audit-tab works!</p>
+<div class="animate-fade-in" *ngIf="_authService.currentUser() as user">
+  
+  <!-- VISTA 1: LISTADO DE USUARIOS (TABLA PLANA ESTILO CLOUDFLARE) -->
+  <div *ngIf="auditViewMode === 'list'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+    
+    <div class="p-4 border-bottom border-light d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+      <div>
+        <h2 class="h5 fw-bold mb-1" style="color: #0A2540;">Directorio General de Cuentas</h2>
+        <p class="text-muted small mb-0">Listado completo de cuentas registradas en las plataformas integradas de ATS.</p>
+      </div>
+      <button (click)="loadUsers()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-2 border rounded-3 fw-semibold text-secondary">
+        <span>🔄</span> Actualizar
+      </button>
+    </div>
+
+    <!-- Alertas rápidas de error -->
+    <div *ngIf="errorMessage" class="m-4 alert alert-danger rounded-3 small p-3 animate-fade-in" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Spinner de carga -->
+    <div *ngIf="loadingUsers" class="d-flex flex-column align-items-center justify-content-center p-5">
+      <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+      <span class="text-muted small fw-medium">Cargando directorio de usuarios...</span>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div *ngIf="!loadingUsers" class="table-responsive">
+      <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+        <thead class="table-light text-muted fw-bold" style="font-size: 0.75rem;">
+          <tr>
+            <th class="ps-4 py-3">USUARIO / NICK</th>
+            <th class="py-3">EMAIL</th>
+            <th class="py-3">NOMBRE</th>
+            <th class="py-3">ROL / STATUS</th>
+            <th class="text-end pe-4 py-3">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of usersList" class="transition-all">
+            <td class="ps-4">
+              <div class="d-flex align-items-center">
+                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold me-2" 
+                     style="width: 32px; height: 32px; background-color: #E2E8F0; color: #475569; font-size: 0.75rem;">
+                  {{ u.usr_name.charAt(0) }}{{ u.usr_surname.charAt(0) }}
+                </div>
+                <span class="fw-bold text-dark">&#64;{{ u.usr_nick }}</span>
+              </div>
+            </td>
+            <td class="text-secondary">{{ u.usr_email }}</td>
+            <td>{{ u.usr_name }} {{ u.usr_surname }}</td>
+            <td>
+              <span class="badge rounded-pill px-2.5 py-1" 
+                    [ngClass]="u.usr_sysadmin ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
+                {{ u.usr_sysadmin ? 'System Admin' : 'Usuario Ecosistema' }}
+              </span>
+            </td>
+            <td class="text-end pe-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button (click)="enterEditMode(u)" class="btn btn-sm btn-outline-primary border-0 rounded-3 px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1">
+                  <span>✏️</span> Editar
+                </button>
+                <!-- Previene eliminarse a sí mismo -->
+                <button *ngIf="user.usr_uuid !== u.usr_uuid" (click)="deleteUser(u.usr_uuid)" class="btn btn-sm btn-outline-danger border-0 rounded-3 px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1">
+                  <span>🗑️</span> Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="usersList.length === 0">
+            <td colspan="5" class="text-center p-5 text-muted">
+              No se encontraron usuarios registrados en la base de datos.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VISTA 2: CONFIGURACIÓN DE CUENTA (FORMULARIO INLINE ESTILO CLOUDFLARE) -->
+  <div *ngIf="auditViewMode === 'edit'" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden animate-fade-in">
+    
+    <!-- Cabecera del formulario / Breadcrumbs -->
+    <div class="p-4 border-bottom border-light">
+      <nav aria-label="breadcrumb" class="mb-2">
+        <ol class="breadcrumb text-muted small mb-0 font-monospace" style="font-size: 0.75rem;">
+          <li class="breadcrumb-item"><a (click)="exitEditMode()" class="text-decoration-none cursor-pointer text-primary">Auditoría Global</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Configuración de Cuenta</li>
+          <li class="breadcrumb-item active text-dark" aria-current="page">&#64;{{ selectedUser?.usr_nick }}</li>
+        </ol>
+      </nav>
+      <h2 class="h5 fw-bold mb-0" style="color: #0A2540;">Editar Cuenta de Usuario</h2>
+    </div>
+
+    <div class="card-body p-4 p-md-5">
+      <!-- Alertas rápidas -->
+      <div *ngIf="successMessage" class="alert alert-success rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="editForm" (ngSubmit)="saveEditedUser()" novalidate>
+        
+        <div class="row g-4 mb-4">
+          <!-- Nombre -->
+          <div class="col-12 col-md-6">
+            <label for="usr_name" class="form-label small fw-bold text-dark">Nombre</label>
+            <input type="text" id="usr_name" formControlName="usr_name"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_name')?.errors }"
+                   placeholder="Nombre"/>
+            <div *ngIf="submitted && editForm.get('usr_name')?.errors?.['required']" class="invalid-feedback small">
+              El nombre es obligatorio.
+            </div>
+          </div>
+
+          <!-- Apellido -->
+          <div class="col-12 col-md-6">
+            <label for="usr_surname" class="form-label small fw-bold text-dark">Apellido</label>
+            <input type="text" id="usr_surname" formControlName="usr_surname"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_surname')?.errors }"
+                   placeholder="Apellido"/>
+            <div *ngIf="submitted && editForm.get('usr_surname')?.errors?.['required']" class="invalid-feedback small">
+              El apellido es obligatorio.
+            </div>
+          </div>
+
+          <!-- Nick (Usuario) -->
+          <div class="col-12 col-md-6">
+            <label for="usr_nick" class="form-label small fw-bold text-dark">Nombre de Usuario (Nick)</label>
+            <input type="text" id="usr_nick" formControlName="usr_nick"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_nick')?.errors }"
+                   placeholder="ej: alvaro123"/>
+            <div *ngIf="submitted && editForm.get('usr_nick')?.errors?.['required']" class="invalid-feedback small">
+              El nick es obligatorio.
+            </div>
+          </div>
+
+          <!-- Correo electrónico -->
+          <div class="col-12 col-md-6">
+            <label for="usr_email" class="form-label small fw-bold text-dark">Correo Electrónico</label>
+            <input type="email" id="usr_email" formControlName="usr_email"
+                   class="form-control px-3 py-2 rounded-3 text-sm"
+                   [ngClass]="{ 'is-invalid': submitted && editForm.get('usr_email')?.errors }"
+                   placeholder="ej: usuario@correo.com"/>
+            <div *ngIf="submitted && editForm.get('usr_email')?.errors?.['required']" class="invalid-feedback small">
+              El correo es obligatorio.
+            </div>
+            <div *ngIf="editForm.get('usr_email')?.errors?.['email']" class="invalid-feedback small">
+              Ingresá un formato de email válido.
+            </div>
+          </div>
+
+          <!-- Rol / sysadmin -->
+          <div class="col-12">
+            <div class="p-3 bg-light rounded-3 border border-light d-flex align-items-center justify-content-between">
+              <div>
+                <span class="d-block fw-bold text-dark text-sm mb-1">Acceso de Administrador Global (SysAdmin)</span>
+                <small class="text-muted" style="font-size: 0.75rem;">Habilita el acceso total a las auditorías globales del Kernel y la facturación consolidada de la suite.</small>
+              </div>
+              <div class="form-check form-switch ps-0">
+                <input class="form-check-input ms-0 cursor-pointer" type="checkbox" role="switch" id="usr_sysadmin" formControlName="usr_sysadmin" style="width: 2.8em; height: 1.4em;">
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirmación de Cuenta -->
+          <div class="col-12 mt-3">
+            <div class="p-3 bg-light rounded-3 border border-light d-flex align-items-center justify-content-between">
+              <div>
+                <span class="d-block fw-bold text-dark text-sm mb-1">Cuenta Confirmada (Activa)</span>
+                <small class="text-muted" style="font-size: 0.75rem;">Indica si el usuario completó la confirmación de email y está autorizado para acceder al sistema.</small>
+              </div>
+              <div class="form-check form-switch ps-0">
+                <input class="form-check-input ms-0 cursor-pointer" type="checkbox" role="switch" id="usr_confirmed" formControlName="usr_confirmed" style="width: 2.8em; height: 1.4em;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex align-items-center gap-3 pt-3 border-top border-light">
+          <button type="submit" [disabled]="loadingSave" class="btn text-white px-4 py-2.5 fw-semibold transition-all rounded-3 shadow hover-btn-cyan d-flex align-items-center gap-2" style="background-color: #0A2540; font-size: 0.85rem;">
+            <span *ngIf="loadingSave" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            {{ loadingSave ? 'Guardando cambios...' : 'Guardar Configuración' }}
+          </button>
+          <button type="button" (click)="exitEditMode()" class="btn btn-outline-secondary px-4 py-2.5 fw-semibold rounded-3 text-sm" style="border-radius: 8px; font-size: 0.85rem;">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- VISTA COMPLEMENTARIA: HISTORIAL DE LOGS Y EVENTOS DE SEGURIDAD -->
+  <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mt-4">
+    <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="h6 fw-bold mb-1" style="color: #0A2540;">🛡️ Historial de Eventos de Seguridad (Auth Audit Logs)</h2>
+        <p class="text-muted small mb-0">Eventos de inicio de sesión, intentos fallidos y trazabilidad de accesos por IP.</p>
+      </div>
+      <button (click)="loadAuditLogs()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-1.5 border rounded-3 fw-semibold text-secondary small">
+        <span>🔄</span> Recargar Logs
+      </button>
+    </div>
+
+    <div *ngIf="loadingAuditLogs" class="text-center py-4">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      <span class="ms-2 small text-muted">Cargando eventos de seguridad...</span>
+    </div>
+
+    <div *ngIf="!loadingAuditLogs && auditLogs.length === 0" class="p-4 text-center text-muted small">
+      No se registraron eventos de seguridad recientes.
+    </div>
+
+    <div *ngIf="!loadingAuditLogs && auditLogs.length > 0" class="table-responsive">
+      <table class="table table-hover align-middle mb-0 text-sm">
+        <thead class="bg-light text-muted font-monospace small" style="font-size: 0.75rem;">
+          <tr>
+            <th class="ps-4">FECHA Y HORA</th>
+            <th>USUARIO</th>
+            <th>ACCIÓN</th>
+            <th>DIRECCIÓN IP</th>
+            <th>DISPOSITIVO / NAV.</th>
+            <th>ESTADO / MOTIVO</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of auditLogs">
+            <td class="ps-4 font-monospace text-muted small">
+              {{ log.usraulo_createdat | date:'dd/MM/yyyy HH:mm:ss' }}
+            </td>
+            <td>
+              <span class="fw-semibold text-dark">{{ log.user?.usr_name || 'Desconocido' }} {{ log.user?.usr_surname || '' }}</span>
+              <small class="d-block text-muted" style="font-size: 0.7rem;">{{ log.user?.usr_email || log.usr_uuid }}</small>
+            </td>
+            <td>
+              <span class="badge px-2.5 py-1 rounded-pill small"
+                    [ngClass]="log.usraulo_action === 'LOGIN_SUCCESS' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20'">
+                {{ log.usraulo_action }}
+              </span>
+            </td>
+            <td class="font-monospace text-dark small">
+              {{ log.usraulo_ipaddress || '127.0.0.1' }}
+            </td>
+            <td class="text-muted small text-truncate" style="max-width: 200px;" title="{{ log.usraulo_useragent }}">
+              {{ log.usraulo_useragent || 'N/A' }}
+            </td>
+            <td>
+              <span *ngIf="log.usraulo_failurereason" class="text-danger small">{{ log.usraulo_failurereason }}</span>
+              <span *ngIf="!log.usraulo_failurereason" class="text-success small">OK</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

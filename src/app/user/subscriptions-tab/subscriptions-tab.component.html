@@ -1,1 +1,128 @@
-<p>subscriptions-tab works!</p>
+<div class="animate-fade-in" *ngIf="_authService.currentUser() as user">
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="h5 fw-bold mb-1" style="color: #0A2540;">💳 Suscripciones y Facturación</h2>
+        <p class="text-muted small mb-0">Gestión centralizada de planes contratados a nivel Usuario y Organización (Empresa).</p>
+      </div>
+      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill font-monospace small">
+        Contexto: {{ _companiesService.activeCompany()?.cmp_name || 'Personal' }}
+      </span>
+    </div>
+
+    <div *ngIf="loadingSubscriptions" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando suscripciones...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loadingSubscriptions && activeSubscriptions.length === 0" class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+      <div class="mb-3 display-6">📦</div>
+      <h3 class="h6 fw-bold text-dark mb-1">Sin suscripciones activas registradas</h3>
+      <p class="text-muted small mb-4">Actualmente no tenés suscripciones activas asociadas a este contexto.</p>
+    </div>
+
+    <div *ngIf="!loadingSubscriptions && activeSubscriptions.length > 0" class="row g-4">
+      <div class="col-12 col-md-6 col-xl-4" *ngFor="let sub of activeSubscriptions">
+        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 position-relative overflow-hidden bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 rounded-pill px-2.5 py-1 small">
+              {{ sub.sub_status }}
+            </span>
+            <span class="badge bg-light text-muted font-monospace small" style="font-size: 0.65rem;">
+              {{ sub.sub_subscribertype }}
+            </span>
+          </div>
+
+          <h3 class="h5 fw-bold text-dark mb-1">
+            {{ sub.plan?.pla_name || 'Plan Estándar' }}
+          </h3>
+          <p class="text-muted small mb-3">
+            {{ sub.application?.app_name || 'Módulo ATS' }}
+          </p>
+
+          <div class="border-top pt-3 mt-auto d-flex justify-content-between align-items-center text-muted small">
+            <span>Renovación:</span>
+            <strong class="text-dark font-monospace">{{ sub.sub_renewsat ? (sub.sub_renewsat | date:'dd/MM/yyyy') : 'Indefinida' }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISTA COMPLEMENTARIA: HISTORIAL DE PAGOS Y TRANSACCIONES -->
+  <section class="mt-5 animate-fade-in">
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="h6 fw-bold mb-1" style="color: #0A2540;">🧾 Historial de Transacciones Financieras</h2>
+          <p class="text-muted small mb-0">Detalle consolidado de cobros, comisiones de plataforma ATS y liquidaciones netas.</p>
+        </div>
+        <button (click)="loadTransactions()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-1.5 border rounded-3 fw-semibold text-secondary small">
+          <span>🔄</span> Actualizar Pagos
+        </button>
+      </div>
+
+      <div *ngIf="loadingTransactions" class="text-center py-4">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        <span class="ms-2 small text-muted">Cargando transacciones...</span>
+      </div>
+
+      <div *ngIf="!loadingTransactions && userTransactions.length === 0" class="p-4 text-center text-muted small">
+        No se registran transacciones de pago en este contexto.
+      </div>
+
+      <div *ngIf="!loadingTransactions && userTransactions.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.75rem;">
+            <tr>
+              <th class="ps-4">FECHA</th>
+              <th>DESCRIPCIÓN / APP</th>
+              <th>MÉTODO / PROVEEDOR</th>
+              <th>ESTADO</th>
+              <th>MONTO BRUTO</th>
+              <th>COMISIÓN ATS</th>
+              <th class="pe-4 text-end">MONTO NETO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let txn of userTransactions">
+              <td class="ps-4 font-monospace text-muted small">
+                {{ txn.trn_createdat | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td>
+                <span class="fw-semibold text-dark">{{ txn.trn_description || 'Pago de Suscripción' }}</span>
+                <small class="d-block text-muted" style="font-size: 0.7rem;">{{ txn.application?.app_name || 'Kernel Suite' }}</small>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border rounded px-2.5 py-1 small text-uppercase">
+                  {{ txn.trn_provider }}
+                </span>
+                <small class="d-block text-muted font-monospace" style="font-size: 0.65rem;">Ref: {{ txn.trn_providerid || 'N/A' }}</small>
+              </td>
+              <td>
+                <span class="badge px-2.5 py-1 rounded-pill small"
+                      [ngClass]="{
+                        'bg-success bg-opacity-10 text-success border border-success border-opacity-20': txn.trn_status === 'APPROVED',
+                        'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20': txn.trn_status === 'PENDING',
+                        'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20': txn.trn_status === 'REJECTED' || txn.trn_status === 'REFUNDED'
+                      }">
+                  {{ txn.trn_status }}
+                </span>
+              </td>
+              <td class="font-monospace text-dark fw-bold">
+                {{ txn.trn_amount | currency:txn.trn_currency:'symbol-narrow':'1.2-2' }}
+              </td>
+              <td class="font-monospace text-danger">
+                -{{ txn.trn_platformfee | currency:txn.trn_currency:'symbol-narrow':'1.2-2' }}
+              </td>
+              <td class="pe-4 text-end font-monospace text-success fw-extrabold">
+                {{ txn.trn_netamount | currency:txn.trn_currency:'symbol-narrow':'1.2-2' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

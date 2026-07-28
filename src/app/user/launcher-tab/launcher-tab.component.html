@@ -1,1 +1,96 @@
-<p>launcher-tab works!</p>
+<div class="animate-fade-in" *ngIf="_authService.currentUser() as user">
+  <section class="mb-5">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center gap-2" style="color: #0A2540;">
+      <span>🚀</span> Lanzador de Aplicaciones
+    </h2>
+    
+    <div class="row g-4">
+      <div class="col-12 col-md-6 col-xl-4" *ngFor="let app of launcherApps">
+        <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden transition-card"
+             [class.opacity-75]="!app.hasAccess" [class.bg-white]="app.hasAccess" [class.bg-light-disable]="!app.hasAccess">
+          
+          <div class="card-body p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-uppercase fw-bold font-monospace px-2 py-0.5 rounded-2" 
+                      [style.backgroundColor]="app.bkColor || 'transparent'" 
+                      [style.color]="app.frColor || '#64748B'" 
+                      style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ app.type }}</span>
+                <span class="badge rounded-pill px-2.5 py-1 small" 
+                      [ngClass]="app.hasAccess ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-20'">
+                  {{ app.hasAccess ? 'Autorizado' : 'Sin Acceso' }}
+                </span>
+              </div>
+
+              <h3 class="h5 fw-bold mb-2 text-dark d-flex align-items-center gap-2">
+                {{ app.name }}
+              </h3>
+              <p class="text-muted lh-sm mb-4" style="font-size: 0.85rem;">{{ app.description }}</p>
+            </div>
+
+            <div class="pt-3 border-top border-light d-flex align-items-center justify-content-between">
+              <span class="font-monospace text-muted" style="font-size: 0.65rem;">DB: {{ app.dbName }}</span>
+              
+              <button *ngIf="app.hasAccess" (click)="launchApp(app)" class="btn btn-sm text-white px-3 fw-semibold transition-all hover-btn-cyan" style="background-color: #0A2540; border-radius: 6px; font-size: 0.8rem;">
+                Ingresar &rarr;
+              </button>
+              
+              <button *ngIf="!app.hasAccess" class="btn btn-sm btn-outline-secondary px-3 fw-semibold" style="border-radius: 6px; font-size: 0.8rem;" disabled>
+                🔒 Bloqueado
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Métricas y Facturación -->
+  <section class="row g-4">
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h3 class="h6 fw-bold mb-4 border-bottom pb-2" style="color: #0A2540;">💳 Tu Plan de Facturación Consolidada</h3>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <span class="h2 fw-extrabold mb-0" style="color: #0A2540;">Bundle Enterprise</span>
+            <p class="text-success small fw-medium mb-0 mt-1">✓ Renovación automática el 01/08/2026</p>
+          </div>
+          <div class="badge bg-info bg-opacity-10 text-info px-3 py-2 rounded-3 fw-bold">Activo</div>
+        </div>
+        <p class="small text-muted mb-4">Este plan unifica el módulo base de ATS Community con infraestructura Works compartida para mantenimiento.</p>
+        <button class="btn btn-sm btn-outline-secondary w-fit fw-semibold" style="border-radius: 6px; font-size: 0.8rem;" disabled>
+          Gestionar Métodos de Pago
+        </button>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-white" style="background-color: #0F172A;">
+        <h3 class="h6 fw-bold mb-3 font-monospace text-info border-bottom border-secondary border-opacity-20 pb-2">// Shared Kernel Metrics</h3>
+        
+        <div class="row g-3 font-monospace" style="font-size: 0.8rem;">
+          <div class="col-6">
+            <span class="text-secondary d-block">TOKEN ISSUER:</span>
+            <span class="text-white">api.guva.idp</span>
+          </div>
+          <div class="col-6">
+            <span class="text-secondary d-block">SESSION TIMEOUT:</span>
+            <span class="text-white">7d (Shared Wildcard Cookie)</span>
+          </div>
+          <div class="col-12">
+            <span class="text-secondary d-block">MIDDLEWARE SSO STATUS:</span>
+            <span class="text-success d-flex align-items-center gap-1.5">
+              <span class="d-inline-block bg-success rounded-circle" style="width: 6px; height: 6px;"></span>
+              Active & Intercepting Requests
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-4 p-2 rounded bg-black bg-opacity-40 font-monospace border border-secondary border-opacity-10" style="font-size: 0.7rem;">
+          <span class="text-muted">[SSO-Log]</span> <span class="text-cyan">Cookie parsed and authenticated natively.</span><br>
+          <span class="text-muted">[SSO-Log]</span> <span class="text-warning">Token verified against Kernel database structure.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

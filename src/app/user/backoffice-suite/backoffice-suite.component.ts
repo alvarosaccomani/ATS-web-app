@@ -1,142 +1,31 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService, UserSession } from '../../core/services/auth.service';
-import { UsersService } from '../../core/services/users.service';
-import { ApplicationsService } from '../../core/services/applications.service';
-import { TypeApplicationsService } from '../../core/services/type-applications.service';
-import { CompaniesService, CompanyItem, UserCompanyRelationItem } from '../../core/services/companies.service';
-import { SubscriptionsService, SubscriptionItem } from '../../core/services/subscriptions.service';
-import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
-import { TransactionsService, TransactionItem } from '../../core/services/transactions.service';
-import { SocketService } from '../../core/services/socket.service';
-
-interface LauncherApp {
-  id: string;
-  app_uuid?: string;
-  name: string;
-  type: string;
-  description: string;
-  dbName: string;
-  url: string;
-  hasAccess: boolean;
-  bkColor?: string | null;
-  frColor?: string | null;
-}
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { CompaniesService, UserCompanyRelationItem } from '../../core/services/companies.service';
 
 @Component({
   selector: 'app-backoffice-suite',
+  standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    RouterModule
   ],
   templateUrl: './backoffice-suite.component.html',
   styleUrl: './backoffice-suite.component.scss',
 })
 export class BackofficeSuiteComponent implements OnInit {
-
-  // Navegación de pestañas secundarias
-  public activeTab: 'launcher' | 'audit' | 'subscriptions' | 'applications' = 'launcher';
-  
-  // Vista interna de Auditoría (listado o edición Cloudflare-style)
-  auditViewMode: 'list' | 'edit' = 'list';
-
-  // Auditoría: Listado y Formulario
-  usersList: any[] = [];
-  loadingUsers = false;
-  selectedUser: any = null;
-  editForm!: FormGroup;
-  submitted = false;
-  loadingSave = false;
-  errorMessage = '';
-  successMessage = '';
-
-  // Listado estático de las apps mapeadas desde el Core con sus permisos específicos
-  launcherApps: LauncherApp[] = [
-  ];
-
   public userCompanies: UserCompanyRelationItem[] = [];
-  public activeSubscriptions: SubscriptionItem[] = [];
-  public loadingSubscriptions = false;
-  public auditLogs: UserAuthLogItem[] = [];
-  public loadingAuditLogs = false;
-  public userTransactions: TransactionItem[] = [];
-  public loadingTransactions = false;
-
-  // ABM de Aplicaciones
-  public applicationsList: any[] = [];
-  public loadingApplicationsList = false;
-  public appsViewMode: 'list' | 'edit' | 'create' = 'list';
-  public selectedApp: any | null = null;
-  public appForm!: FormGroup;
-  public typeApplicationsList: any[] = [];
-  public loadingTypeApps = false;
 
   constructor(
     public _authService: AuthService,
-    private _usersService: UsersService,
-    private _applicationsService: ApplicationsService,
     public _companiesService: CompaniesService,
-    private _subscriptionsService: SubscriptionsService,
-    private _userAuthLogsService: UserAuthLogsService,
-    private _transactionsService: TransactionsService,
-    private _socketService: SocketService,
-    private _typeApplicationsService: TypeApplicationsService,
-    private fb: FormBuilder,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    this.initForm();
-    this.loadApplications();
     this.loadUserCompanies();
-    this.setupSocketListeners();
-  }
-
-  private setupSocketListeners(): void {
-    // Escuchar creación y eliminación de usuarios
-    this._socketService.onEvent<any>('user_created').subscribe(() => {
-      this.loadUsers();
-    });
-    this._socketService.onEvent<any>('user_deleted').subscribe(() => {
-      this.loadUsers();
-    });
-
-    // Escuchar creación de logs de auditoría de autenticación
-    this._socketService.onEvent<any>('auth_log_created').subscribe(() => {
-      this.loadAuditLogs();
-    });
-
-    // Escuchar transacciones de pago en tiempo real
-    this._socketService.onEvent<any>('transaction_created').subscribe(() => {
-      this.loadTransactions();
-    });
-  }
-
-  public loadApplications(): void {
-    this._applicationsService.getApplications().subscribe({
-      next: (response: any) => {
-        if (response.success && Array.isArray(response.data) && response.data.length > 0) {
-          this.launcherApps = response.data.map((app: any) => ({
-            id: app.app_cod || app.app_uuid,
-            app_uuid: app.app_uuid,
-            name: app.app_name,
-            type: app.typeApplication?.tapp_name || app.typeApplication?.tapp_cod || 'Core',
-            description: app.app_description,
-            dbName: app.app_dbname,
-            url: app.app_url,
-            hasAccess: app.app_hasaccess ?? true,
-            bkColor: app.typeApplication?.tapp_bkcolor || null,
-            frColor: app.typeApplication?.tapp_frcolor || null
-          }));
-        }
-      },
-      error: (error: any) => {
-        // Conserva el catálogo por defecto como fallback si la DB está vacía
-      }
-    });
   }
 
   public loadUserCompanies(): void {
@@ -150,398 +39,23 @@ export class BackofficeSuiteComponent implements OnInit {
               const firstCompany = response.data[0].company || response.data[0];
               this._companiesService.setActiveCompany(firstCompany);
             }
+            this.cdr.detectChanges();
           }
         },
-        error: (error: any) => {}
+        error: (error: any) => {
+          console.error('Error al cargar empresas del usuario:', error);
+        }
       });
     }
   }
 
   public selectCompany(company: any): void {
     this._companiesService.setActiveCompany(company);
-  }
-
-  private initForm(): void {
-    this.editForm = this.fb.group({
-      usr_nick: ['', [Validators.required]],
-      usr_email: ['', [Validators.required, Validators.email]],
-      usr_name: ['', [Validators.required]],
-      usr_surname: ['', [Validators.required]],
-      usr_sysadmin: [false],
-      usr_confirmed: [false]
-    });
-
-    this.appForm = this.fb.group({
-      app_cod: ['', [Validators.required]],
-      app_name: ['', [Validators.required]],
-      tapp_uuid: ['', [Validators.required]],
-      app_description: ['', [Validators.required]],
-      app_dbname: ['', [Validators.required]],
-      app_url: ['', [Validators.required]],
-      app_hasaccess: [true],
-      app_active: [true]
-    });
-  }
-
-  public setTab(tab: 'launcher' | 'audit' | 'subscriptions' | 'applications'): void {
-    this.activeTab = tab;
-    if (tab === 'audit') {
-      this.auditViewMode = 'list';
-      this.loadUsers();
-      this.loadAuditLogs();
-    } else if (tab === 'subscriptions') {
-      this.loadSubscriptions();
-      this.loadTransactions();
-    } else if (tab === 'applications') {
-      this.appsViewMode = 'list';
-      this.loadAppsCatalog();
-      this.loadTypeApplications();
-    }
-  }
-
-  public loadAuditLogs(): void {
-    this.loadingAuditLogs = true;
     this.cdr.detectChanges();
-    this._userAuthLogsService.getUserAuthLogs().subscribe({
-      next: (response: any) => {
-        this.loadingAuditLogs = false;
-        if (response.success && Array.isArray(response.data)) {
-          this.auditLogs = response.data;
-        }
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loadingAuditLogs = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  public loadTransactions(): void {
-    this.loadingTransactions = true;
-    this.cdr.detectChanges();
-    const activeCmp = this._companiesService.activeCompany();
-    const user = this._authService.currentUser();
-
-    if (activeCmp?.cmp_uuid) {
-      this._transactionsService.getTransactionsBySubscriber('COMPANY', activeCmp.cmp_uuid).subscribe({
-        next: (response: any) => {
-          this.loadingTransactions = false;
-          this.userTransactions = response.data || [];
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loadingTransactions = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } else if (user?.usr_uuid) {
-      this._transactionsService.getTransactionsBySubscriber('USER', user.usr_uuid).subscribe({
-        next: (response: any) => {
-          this.loadingTransactions = false;
-          this.userTransactions = response.data || [];
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loadingTransactions = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      this.loadingTransactions = false;
-      this.cdr.detectChanges();
-    }
-  }
-
-  public loadSubscriptions(): void {
-    this.loadingSubscriptions = true;
-    this.cdr.detectChanges();
-    const activeCmp = this._companiesService.activeCompany();
-    const user = this._authService.currentUser();
-
-    if (activeCmp?.cmp_uuid) {
-      this._subscriptionsService.getSubscriptionsBySubscriber('COMPANY', activeCmp.cmp_uuid).subscribe({
-        next: (response: any) => {
-          this.loadingSubscriptions = false;
-          this.activeSubscriptions = response.data || [];
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loadingSubscriptions = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } else if (user?.usr_uuid) {
-      this._subscriptionsService.getSubscriptionsBySubscriber('USER', user.usr_uuid).subscribe({
-        next: (response: any) => {
-          this.loadingSubscriptions = false;
-          this.activeSubscriptions = response.data || [];
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loadingSubscriptions = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      this.loadingSubscriptions = false;
-      this.cdr.detectChanges();
-    }
-  }
-
-  public loadUsers(): void {
-    this.loadingUsers = true;
-    this.errorMessage = '';
-    this.cdr.detectChanges();
-    this._usersService.getUsers().subscribe({
-      next: (response: any) => {
-        this.loadingUsers = false;
-        if (response.success && response.data) {
-          this.usersList = response.data;
-        } else {
-          this.usersList = response.data || [];
-        }
-        this.cdr.detectChanges();
-      },
-      error: (error: any) => {
-        this.loadingUsers = false;
-        this.errorMessage = 'No se pudo recuperar los usuarios de la base de datos.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  public enterEditMode(user: any): void {
-    this.selectedUser = user;
-    this.auditViewMode = 'edit';
-    this.submitted = false;
-    this.errorMessage = '';
-    this.successMessage = '';
-    
-    this.editForm.patchValue({
-      usr_nick: user.usr_nick,
-      usr_email: user.usr_email,
-      usr_name: user.usr_name,
-      usr_surname: user.usr_surname,
-      usr_sysadmin: !!user.usr_sysadmin,
-      usr_confirmed: !!user.usr_confirmed
-    });
-    this.cdr.detectChanges();
-  }
-
-  public exitEditMode(): void {
-    this.selectedUser = null;
-    this.auditViewMode = 'list';
-    this.editForm.reset();
-    this.cdr.detectChanges();
-  }
-
-  public saveEditedUser(): void {
-    this.submitted = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if (this.editForm.invalid || !this.selectedUser) {
-      return;
-    }
-
-    this.loadingSave = true;
-    this.cdr.detectChanges();
-    this._usersService.updateUser(this.selectedUser.usr_uuid, this.editForm.value).subscribe({
-      next: (response: any) => {
-        this.loadingSave = false;
-        this.successMessage = 'Usuario actualizado correctamente.';
-        this.cdr.detectChanges();
-        this.loadUsers();
-        
-        // Retornar a la vista principal después de 1.5s
-        setTimeout(() => {
-          this.exitEditMode();
-        }, 1500);
-      },
-      error: (error: any) => {
-        this.loadingSave = false;
-        this.errorMessage = error.error?.error || error.error?.message || 'Ocurrió un error al intentar actualizar el usuario.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  public deleteUser(usr_uuid: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this._usersService.deleteUser(usr_uuid).subscribe({
-        next: () => {
-          this.loadUsers();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.errorMessage = 'No se pudo eliminar el usuario seleccionado.';
-          this.cdr.detectChanges();
-        }
-      });
-    }
-  }
-
-  public launchApp(app: LauncherApp): void {
-    if (!app.app_uuid) {
-      window.open(app.url, '_blank');
-      return;
-    }
-
-    console.log(`[SSO] Solicitando token de intercambio para la app: ${app.name}`);
-    this._authService.getSSOToken(app.app_uuid).subscribe({
-      next: (response: any) => {
-        if (response.success && response.data?.token) {
-          const ssoUrl = `${app.url}/auth/sso?token=${response.data.token}`;
-          console.log(`[Router SSO] Redirigiendo hacia: ${ssoUrl}`);
-          window.open(ssoUrl, '_blank');
-        } else {
-          window.open(app.url, '_blank');
-        }
-      },
-      error: () => {
-        window.open(app.url, '_blank');
-      }
-    });
   }
 
   public logout(): void {
     this._authService.logout();
     this.router.navigate(['/auth/login']);
-  }
-
-  public loadAppsCatalog(): void {
-    console.log('[loadAppsCatalog] Iniciando carga de catálogo de aplicaciones...');
-    this.loadingApplicationsList = true;
-    this._applicationsService.getApplications().subscribe({
-      next: (response: any) => {
-        console.log('[loadAppsCatalog] Respuesta exitosa recibida:', response);
-        this.loadingApplicationsList = false;
-        this.applicationsList = response.data || [];
-        console.log('[loadAppsCatalog] loadingApplicationsList seteado a false. Cantidad de apps:', this.applicationsList.length);
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('[loadAppsCatalog] Error al cargar catálogo de aplicaciones:', err);
-        this.loadingApplicationsList = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  public enterCreateAppMode(): void {
-    this.selectedApp = null;
-    this.appsViewMode = 'create';
-    this.submitted = false;
-    this.errorMessage = '';
-    this.successMessage = '';
-    this.appForm.reset({
-      app_hasaccess: true,
-      app_active: true
-    });
-    this.cdr.detectChanges();
-  }
-
-  public enterEditAppMode(app: any): void {
-    this.selectedApp = app;
-    this.appsViewMode = 'edit';
-    this.submitted = false;
-    this.errorMessage = '';
-    this.successMessage = '';
-    this.appForm.patchValue({
-      app_cod: app.app_cod,
-      app_name: app.app_name,
-      tapp_uuid: app.tapp_uuid || '',
-      app_description: app.app_description,
-      app_dbname: app.app_dbname,
-      app_url: app.app_url,
-      app_hasaccess: !!app.app_hasaccess,
-      app_active: !!app.app_active
-    });
-    this.cdr.detectChanges();
-  }
-
-  public exitAppMode(): void {
-    this.selectedApp = null;
-    this.appsViewMode = 'list';
-    this.appForm.reset();
-    this.cdr.detectChanges();
-  }
-
-  public saveApplication(): void {
-    this.submitted = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if (this.appForm.invalid) {
-      return;
-    }
-
-    this.loadingSave = true;
-    this.cdr.detectChanges();
-    if (this.appsViewMode === 'create') {
-      this._applicationsService.saveApplication(this.appForm.value).subscribe({
-        next: () => {
-          this.loadingSave = false;
-          this.successMessage = 'Aplicación creada con éxito.';
-          this.loadAppsCatalog();
-          this.loadApplications();
-          this.cdr.detectChanges();
-          setTimeout(() => this.exitAppMode(), 1500);
-        },
-        error: (err: any) => {
-          this.loadingSave = false;
-          this.errorMessage = err.error?.error || err.error?.message || 'Error al crear la aplicación.';
-          this.cdr.detectChanges();
-        }
-      });
-    } else if (this.appsViewMode === 'edit' && this.selectedApp) {
-      this._applicationsService.updateApplication(this.selectedApp.app_uuid, this.appForm.value).subscribe({
-        next: () => {
-          this.loadingSave = false;
-          this.successMessage = 'Aplicación actualizada con éxito.';
-          this.loadAppsCatalog();
-          this.loadApplications();
-          this.cdr.detectChanges();
-          setTimeout(() => this.exitAppMode(), 1500);
-        },
-        error: (err: any) => {
-          this.loadingSave = false;
-          this.errorMessage = err.error?.error || err.error?.message || 'Error al actualizar la aplicación.';
-          this.cdr.detectChanges();
-        }
-      });
-    }
-  }
-
-  public deleteApplication(app_uuid: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta aplicación del catálogo?')) {
-      this._applicationsService.deleteApplication(app_uuid).subscribe({
-        next: () => {
-          this.loadAppsCatalog();
-          this.loadApplications();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.errorMessage = 'No se pudo eliminar la aplicación seleccionada.';
-          this.cdr.detectChanges();
-        }
-      });
-    }
-  }
-
-  public loadTypeApplications(): void {
-    this.loadingTypeApps = true;
-    this._typeApplicationsService.getTypeApplications().subscribe({
-      next: (response: any) => {
-        this.loadingTypeApps = false;
-        this.typeApplicationsList = response.data || [];
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loadingTypeApps = false;
-        this.cdr.detectChanges();
-      }
-    });
   }
 }
