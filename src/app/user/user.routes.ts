@@ -7,6 +7,7 @@ import { LauncherTabComponent } from './launcher-tab/launcher-tab.component';
 import { AuditTabComponent } from './audit-tab/audit-tab.component';
 import { SubscriptionsTabComponent } from './subscriptions-tab/subscriptions-tab.component';
 import { ApplicationsTabComponent } from './applications-tab/applications-tab.component';
+import { ApplicationSettingsTabComponent } from './application-settings-tab/application-settings-tab.component';
 
 export const USER_ROUTES: Routes = [
     {
@@ -22,7 +23,8 @@ export const USER_ROUTES: Routes = [
                     { path: 'launcher', component: LauncherTabComponent },
                     { path: 'audit', component: AuditTabComponent },
                     { path: 'subscriptions', component: SubscriptionsTabComponent },
-                    { path: 'applications', component: ApplicationsTabComponent }
+                    { path: 'applications', component: ApplicationsTabComponent },
+                    { path: 'application-settings/:app_uuid', component: ApplicationSettingsTabComponent }
                 ]
             }
         ]
