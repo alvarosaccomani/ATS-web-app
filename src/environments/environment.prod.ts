@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.ats.com.ar/api/',
+  apiUrl: 'https://api.atssuite.com.ar/api/',
   appName: 'ATS'
 };
