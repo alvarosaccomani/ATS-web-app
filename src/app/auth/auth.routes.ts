@@ -15,9 +15,9 @@ export const AUTH_ROUTES: Routes = [
         children: [
             { path: 'register', component: RegisterComponent},
             { path: 'login', component: LoginComponent},
-            { path: 'confirm-account', component: ConfirmAccountComponent},
+            { path: 'confirm-account/:usr_ConfirmationToken', component: ConfirmAccountComponent},
             { path: 'forgot-password', component: ForgotPasswordComponent},
-            { path: 'reset-password', component: ResetPasswordComponent},
+            { path: 'reset-password/:usr_ResetPasswordToken', component: ResetPasswordComponent},
             { path: 'sso', component: SsoCallbackComponent },
         ]
     }

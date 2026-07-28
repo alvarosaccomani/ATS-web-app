@@ -31,11 +31,20 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.token = params['token'] || '';
-      if (!this.token) {
-        this.tokenMissing = true;
-        this.errorMessage = 'El token de restauración de contraseña es inválido o no se encuentra en la dirección web.';
+    this.route.params.subscribe(params => {
+      let token = params['usr_ResetPasswordToken'] || params['token'];
+      if (token) {
+        this.token = token;
+        this.tokenMissing = false;
+        this.errorMessage = '';
+      } else {
+        this.route.queryParams.subscribe(qParams => {
+          this.token = qParams['usr_ResetPasswordToken'] || qParams['token'] || '';
+          if (!this.token) {
+            this.tokenMissing = true;
+            this.errorMessage = 'El token de restauración de contraseña es inválido o no se encuentra en la dirección web.';
+          }
+        });
       }
     });
     this.initForm();

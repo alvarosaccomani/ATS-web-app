@@ -23,14 +23,21 @@ export class ConfirmAccountComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      const token = params['token'];
-      if (!token) {
-        this.status = 'error';
-        this.errorMessage = 'El token de confirmación no fue proporcionado en la dirección web.';
-        return;
+    this.route.params.subscribe(params => {
+      let token = params['usr_ConfirmationToken'] || params['token'];
+      if (token) {
+        this.confirmToken(token);
+      } else {
+        this.route.queryParams.subscribe(qParams => {
+          token = qParams['usr_ConfirmationToken'] || qParams['token'];
+          if (!token) {
+            this.status = 'error';
+            this.errorMessage = 'El token de confirmación no fue proporcionado en la dirección web.';
+            return;
+          }
+          this.confirmToken(token);
+        });
       }
-      this.confirmToken(token);
     });
   }
 
