@@ -1,1 +1,108 @@
-<p>application-settings-tab works!</p>
+<div class="container-fluid animate-fade-in p-0">
+  
+  <!-- Breadcrumbs & Header -->
+  <div class="d-flex flex-column mb-4">
+    <nav aria-label="breadcrumb" class="mb-2">
+      <ol class="breadcrumb text-muted small mb-0 font-monospace" style="font-size: 0.75rem;">
+        <li class="breadcrumb-item"><a routerLink="/user/backoffice-suite/applications" class="text-decoration-none text-primary cursor-pointer">Ecosistema</a></li>
+        <li class="breadcrumb-item active text-dark" aria-current="page">Configuración de Satélite</li>
+        <li class="breadcrumb-item active text-dark fw-bold" aria-current="page" *ngIf="appName">{{ appName }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center gap-2">
+      <h1 class="h4 fw-extrabold mb-0" style="color: #0A2540;">Ajustes de Ecosistema: {{ appName || 'Cargando...' }}</h1>
+      <span class="badge bg-light text-secondary border rounded-pill font-monospace" style="font-size: 0.7rem;">ID: {{ app_uuid }}</span>
+    </div>
+    <p class="text-muted small mb-0">Gestión de parámetros visuales, logos e identidades corporativas del satélite.</p>
+  </div>
+
+  <!-- Alertas de estado -->
+  <div *ngIf="successMessage" class="alert alert-success rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+    <strong>¡Éxito!</strong> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger rounded-3 small p-3 mb-4 animate-fade-in" role="alert">
+    <strong>Error:</strong> {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="d-flex flex-column align-items-center justify-content-center p-5 bg-white rounded-4 shadow-sm border border-light">
+    <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+    <span class="text-muted small fw-medium">Cargando esquema de configuraciones...</span>
+  </div>
+
+  <!-- Configuraciones agrupadas -->
+  <div *ngIf="!isLoading" class="pb-5 mb-5">
+    <div *ngFor="let group of groupedSettings" class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4 border border-light">
+      
+      <div class="card-header bg-white p-4 border-bottom border-light">
+        <h3 class="h6 fw-bold mb-0 d-flex align-items-center gap-2" style="color: #0A2540;">
+          <span>⚙️</span> Ajustes de {{ group.groupName }}
+        </h3>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          <div *ngFor="let setting of group.items" class="list-group-item p-4 border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 transition-all">
+            
+            <!-- Metadata del Ajuste -->
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="fw-bold text-dark text-sm">{{ setting.apps_parameter }}</span>
+                <code class="badge bg-light text-secondary font-monospace" style="font-size: 0.65rem;">{{ setting.apps_key }}</code>
+              </div>
+              <small class="text-muted d-block" style="font-size: 0.75rem;">{{ setting.apps_description }}</small>
+            </div>
+
+            <!-- Control del Ajuste -->
+            <div class="d-flex align-items-center justify-content-md-end style-control-col">
+              
+              <!-- Boolean (Toggle Switch) -->
+              <div *ngIf="setting.apps_datatype === 'boolean'" class="form-check form-switch p-0 m-0">
+                <input class="form-check-input ms-0 cursor-pointer" type="checkbox" role="switch"
+                       [checked]="getBooleanValue(setting.apps_value)"
+                       (change)="setBooleanValue(setting, $any($event.target).checked)"
+                       style="width: 2.8em; height: 1.4em;">
+              </div>
+
+              <!-- Select Dropdown -->
+              <select *ngIf="setting.apps_datatype === 'select'" [(ngModel)]="setting.apps_value" 
+                      class="form-select px-3 py-2 rounded-3 text-sm" style="width: 260px; font-size: 0.8rem;">
+                <option *ngFor="let opt of getOptions(setting.apps_options)" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <!-- Color Picker -->
+              <div *ngIf="setting.apps_datatype === 'color'" class="d-flex align-items-center gap-2 border px-2 py-1.5 rounded-3 bg-light" style="width: 160px;">
+                <input type="color" class="form-control form-control-color border-0 p-0 cursor-pointer" 
+                       [(ngModel)]="setting.apps_value" style="width: 32px; height: 32px; border-radius: 4px; background: transparent;">
+                <span class="font-monospace text-uppercase small text-secondary" style="font-size: 0.8rem;">{{ setting.apps_value }}</span>
+              </div>
+
+              <!-- Number -->
+              <input *ngIf="setting.apps_datatype === 'number'" type="number" [(ngModel)]="setting.apps_value"
+                     class="form-control px-3 py-2 rounded-3 text-sm" style="width: 140px; font-size: 0.8rem;" min="0">
+
+              <!-- String (Text Input) -->
+              <input *ngIf="setting.apps_datatype === 'string'" type="text" [(ngModel)]="setting.apps_value"
+                     class="form-control px-3 py-2 rounded-3 text-sm" style="width: 280px; font-size: 0.8rem;" placeholder="Completar valor...">
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer de Acciones Sticky -->
+  <div *ngIf="!isLoading" class="sticky-bottom bg-white border p-4 shadow-sm d-flex justify-content-end align-items-center gap-3 rounded-4 mt-4 mb-4">
+    <button (click)="onCancel()" class="btn btn-outline-secondary px-4 py-2.5 fw-semibold rounded-3 text-sm" style="font-size: 0.85rem;" [disabled]="loadingSave">
+      Descartar Cambios
+    </button>
+    <button (click)="onSave()" class="btn text-white px-4 py-2.5 fw-semibold transition-all rounded-3 shadow hover-btn-cyan d-flex align-items-center gap-2" style="background-color: #0A2540; font-size: 0.85rem;" [disabled]="loadingSave">
+      <span *ngIf="loadingSave" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      {{ loadingSave ? 'Guardando...' : 'Guardar Configuraciones' }}
+    </button>
+  </div>
+
+</div>
