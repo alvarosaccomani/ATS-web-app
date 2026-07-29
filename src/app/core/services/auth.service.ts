@@ -54,7 +54,7 @@ export class AuthService {
   }
 
   public register(userData: any): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}register`, userData);
+    return this.http.post<any>(`${environment.apiUrl}register`, { ...userData, app_cod: 'Central' });
   }
 
   public checkNickExist(usr_nick: string): Observable<any> {
@@ -70,7 +70,7 @@ export class AuthService {
   }
 
   public forgotPassword(usr_email: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}forgot-password`, { usr_email });
+    return this.http.post<any>(`${environment.apiUrl}forgot-password`, { usr_email, app_cod: 'Central' });
   }
 
   public resetPassword(token: string, newPassword: string): Observable<any> {
