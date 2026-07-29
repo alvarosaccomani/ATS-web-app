@@ -67,6 +67,9 @@
             </td>
             <td class="pe-4 text-end">
               <div class="d-inline-flex gap-2">
+                <a [routerLink]="['/user/backoffice-suite/application-settings', app.app_uuid]" class="btn btn-light btn-xs border border-primary-subtle text-primary rounded-3 fw-semibold px-2.5 py-1 small text-decoration-none" style="font-size: 0.75rem;">
+                  Ajustes
+                </a>
                 <button (click)="enterEditAppMode(app)" class="btn btn-light btn-xs border rounded-3 fw-semibold text-secondary px-2.5 py-1 small" style="font-size: 0.75rem;">
                   Editar
                 </button>

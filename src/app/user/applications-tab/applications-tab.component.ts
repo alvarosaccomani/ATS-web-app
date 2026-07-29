@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ApplicationsService } from '../../core/services/applications.service';
 import { TypeApplicationsService } from '../../core/services/type-applications.service';
@@ -8,7 +9,7 @@ import { TypeApplicationsService } from '../../core/services/type-applications.s
 @Component({
   selector: 'app-applications-tab',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './applications-tab.component.html',
   styleUrl: './applications-tab.component.scss',
 })
