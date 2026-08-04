@@ -25,8 +25,12 @@ export class UserAuthLogsService {
     private http: HttpClient
   ) { }
 
-  public getUserAuthLogs(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}user-auth-logs`);
+  public getUserAuthLogs(page?: number, perPage?: number): Observable<any> {
+    let url = `${environment.apiUrl}user-auth-logs`;
+    if (page && perPage) {
+      url += `?page=${page}&perPage=${perPage}`;
+    }
+    return this.http.get<any>(url);
   }
 
   public getUserAuthLogsByUserId(usr_uuid: string): Observable<any> {
