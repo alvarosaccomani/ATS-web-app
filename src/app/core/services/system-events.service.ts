@@ -25,7 +25,11 @@ export class SystemEventsService {
     private http: HttpClient
   ) { }
 
-  public getSystemEvents(): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}system-events`);
+  public getSystemEvents(page?: number, perPage?: number): Observable<any> {
+    let url = `${environment.apiUrl}system-events`;
+    if (page && perPage) {
+      url += `?page=${page}&perPage=${perPage}`;
+    }
+    return this.http.get<any>(url);
   }
 }
