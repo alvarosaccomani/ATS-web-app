@@ -142,6 +142,26 @@ export class AuditTabComponent implements OnInit, OnDestroy {
     });
   }
 
+  public formatDetailsShort(details: any): string {
+    if (!details) return 'N/A';
+    if (typeof details === 'string') {
+      return details;
+    }
+    return JSON.stringify(details);
+  }
+
+  public formatDetailsLong(details: any): string {
+    if (!details) return 'N/A';
+    if (typeof details === 'string') {
+      try {
+        return JSON.stringify(JSON.parse(details), null, 2);
+      } catch {
+        return details;
+      }
+    }
+    return JSON.stringify(details, null, 2);
+  }
+
   public enterEditMode(user: any): void {
     this.selectedUser = user;
     this.auditViewMode = 'edit';

@@ -310,12 +310,19 @@
                 <small *ngIf="ev.user" class="d-block text-muted" style="font-size: 0.7rem;">{{ ev.user.usr_email }}</small>
               </td>
               <td>
-                <span class="badge px-2.5 py-1 rounded-pill small border"
-                      [ngClass]="{
-                        'bg-success bg-opacity-10 text-success border-success border-opacity-20': ev.sysev_action.includes('CREATED') || ev.sysev_action.includes('ADDED'),
-                        'bg-primary bg-opacity-10 text-primary border-primary border-opacity-20': ev.sysev_action.includes('UPDATED'),
-                        'bg-danger bg-opacity-10 text-danger border-danger border-opacity-20': ev.sysev_action.includes('DELETED')
-                      }">
+                <span class="badge px-2.5 py-1 rounded-pill small border fw-bold text-uppercase"
+                      [style.background-color]="
+                        ev.sysev_action.includes('CREATED') || ev.sysev_action.includes('ADDED') ? 'rgba(25, 135, 84, 0.12)' :
+                        ev.sysev_action.includes('UPDATED') ? 'rgba(13, 110, 253, 0.12)' :
+                        'rgba(220, 53, 69, 0.12)'"
+                      [style.color]="
+                        ev.sysev_action.includes('CREATED') || ev.sysev_action.includes('ADDED') ? '#198754' :
+                        ev.sysev_action.includes('UPDATED') ? '#0d6efd' :
+                        '#dc3545'"
+                      [style.border-color]="
+                        ev.sysev_action.includes('CREATED') || ev.sysev_action.includes('ADDED') ? 'rgba(25, 135, 84, 0.2)' :
+                        ev.sysev_action.includes('UPDATED') ? 'rgba(13, 110, 253, 0.2)' :
+                        'rgba(220, 53, 69, 0.2)'">
                   {{ ev.sysev_action }}
                 </span>
               </td>
@@ -325,9 +332,9 @@
               </td>
               <td>
                 <span class="text-muted font-monospace small text-truncate d-block" 
-                      style="max-width: 250px; font-size: 0.72rem;" 
-                      title="{{ ev.sysev_details }}">
-                  {{ ev.sysev_details || 'N/A' }}
+                      style="max-width: 250px; font-size: 0.72rem; cursor: help;" 
+                      title="{{ formatDetailsLong(ev.sysev_details) }}">
+                  {{ formatDetailsShort(ev.sysev_details) }}
                 </span>
               </td>
               <td>
