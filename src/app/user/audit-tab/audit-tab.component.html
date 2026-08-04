@@ -197,68 +197,149 @@
     </div>
   </div>
 
-  <!-- VISTA COMPLEMENTARIA: HISTORIAL DE LOGS Y EVENTOS DE SEGURIDAD -->
+  <!-- VISTA COMPLEMENTARIA: HISTORIAL DE LOGS Y EVENTOS DE SEGURIDAD / SISTEMA -->
   <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden mt-4">
-    <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="h6 fw-bold mb-1" style="color: #0A2540;">🛡️ Historial de Eventos de Seguridad (Auth Audit Logs)</h2>
-        <p class="text-muted small mb-0">Eventos de inicio de sesión, intentos fallidos y trazabilidad de accesos por IP.</p>
+    
+    <!-- Selectores de Pestañas (Tabs) -->
+    <div class="p-4 border-bottom border-light d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+      <div class="d-flex align-items-center gap-4">
+        <button (click)="activeLogsTab = 'auth'; loadAuditLogs()" 
+                class="btn pb-2 px-1 rounded-0 fw-bold border-bottom border-2 text-sm transition-all"
+                [ngClass]="activeLogsTab === 'auth' ? 'border-primary text-primary' : 'border-transparent text-muted'"
+                style="margin-bottom: -1.15rem; background: none; border-top: none; border-left: none; border-right: none; font-size: 0.85rem;">
+          🛡️ Accesos y Seguridad (SSO)
+        </button>
+        <button (click)="activeLogsTab = 'system'; loadSystemEvents()" 
+                class="btn pb-2 px-1 rounded-0 fw-bold border-bottom border-2 text-sm transition-all"
+                [ngClass]="activeLogsTab === 'system' ? 'border-primary text-primary' : 'border-transparent text-muted'"
+                style="margin-bottom: -1.15rem; background: none; border-top: none; border-left: none; border-right: none; font-size: 0.85rem;">
+          ⚙️ Cambios del Sistema (Auditoría)
+        </button>
       </div>
-      <button (click)="loadAuditLogs()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-1.5 border rounded-3 fw-semibold text-secondary small">
-        <span>🔄</span> Recargar Logs
-      </button>
+      <div>
+        <button (click)="activeLogsTab === 'auth' ? loadAuditLogs() : loadSystemEvents()" class="btn btn-light btn-sm d-flex align-items-center gap-1.5 px-3 py-1.5 border rounded-3 fw-semibold text-secondary small">
+          <span>🔄</span> Recargar
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="loadingAuditLogs" class="text-center py-4">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      <span class="ms-2 small text-muted">Cargando eventos de seguridad...</span>
+    <!-- CONTENIDO TAB 1: LOGS DE INICIO DE SESIÓN -->
+    <div *ngIf="activeLogsTab === 'auth'">
+      <div *ngIf="loadingAuditLogs" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+        <div class="small text-muted">Cargando eventos de seguridad...</div>
+      </div>
+
+      <div *ngIf="!loadingAuditLogs && auditLogs.length === 0" class="p-5 text-center text-muted small">
+        No se registraron eventos de seguridad recientes.
+      </div>
+
+      <div *ngIf="!loadingAuditLogs && auditLogs.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm" style="font-size: 0.82rem;">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.72rem;">
+            <tr>
+              <th class="ps-4 py-2.5">FECHA Y HORA</th>
+              <th>USUARIO</th>
+              <th>ACCIÓN</th>
+              <th>DIRECCIÓN IP</th>
+              <th>DISPOSITIVO / NAV.</th>
+              <th>ESTADO / MOTIVO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of auditLogs">
+              <td class="ps-4 font-monospace text-muted small">
+                {{ log.usraulo_createdat | date:'dd/MM/yyyy HH:mm:ss' }}
+              </td>
+              <td>
+                <span class="fw-semibold text-dark">{{ log.user?.usr_name || 'Desconocido' }} {{ log.user?.usr_surname || '' }}</span>
+                <small class="d-block text-muted" style="font-size: 0.7rem;">{{ log.user?.usr_email || log.usr_uuid }}</small>
+              </td>
+              <td>
+                <span class="badge px-2.5 py-1 rounded-pill small border"
+                      [ngClass]="log.usraulo_action === 'LOGIN_SUCCESS' ? 'bg-success bg-opacity-10 text-success border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border-danger border-opacity-20'">
+                  {{ log.usraulo_action }}
+                </span>
+              </td>
+              <td class="font-monospace text-dark small">
+                {{ log.usraulo_ipaddress || '127.0.0.1' }}
+              </td>
+              <td class="text-muted small text-truncate" style="max-width: 200px;" title="{{ log.usraulo_useragent }}">
+                {{ log.usraulo_useragent || 'N/A' }}
+              </td>
+              <td>
+                <span *ngIf="log.usraulo_failurereason" class="text-danger small">{{ log.usraulo_failurereason }}</span>
+                <span *ngIf="!log.usraulo_failurereason" class="text-success small">OK</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div *ngIf="!loadingAuditLogs && auditLogs.length === 0" class="p-4 text-center text-muted small">
-      No se registraron eventos de seguridad recientes.
+    <!-- CONTENIDO TAB 2: BITÁCORA DE EVENTOS DE SISTEMA -->
+    <div *ngIf="activeLogsTab === 'system'">
+      <div *ngIf="loadingSystemEvents" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+        <div class="small text-muted">Cargando bitácora del sistema...</div>
+      </div>
+
+      <div *ngIf="!loadingSystemEvents && systemEvents.length === 0" class="p-5 text-center text-muted small">
+        No se registraron cambios operativos recientes en el sistema.
+      </div>
+
+      <div *ngIf="!loadingSystemEvents && systemEvents.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm" style="font-size: 0.82rem;">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.72rem;">
+            <tr>
+              <th class="ps-4 py-2.5">FECHA Y HORA</th>
+              <th>USUARIO EJECUTOR</th>
+              <th>ACCIÓN</th>
+              <th>ENTIDAD / UUID</th>
+              <th>DETALLES DEL EVENTO</th>
+              <th>IP / CLIENTE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ev of systemEvents">
+              <td class="ps-4 font-monospace text-muted small">
+                {{ ev.sysev_createdat | date:'dd/MM/yyyy HH:mm:ss' }}
+              </td>
+              <td>
+                <span class="fw-semibold text-dark">{{ ev.user ? ev.user.usr_name + ' ' + ev.user.usr_surname : 'Sistema / Auto-registro' }}</span>
+                <small *ngIf="ev.user" class="d-block text-muted" style="font-size: 0.7rem;">{{ ev.user.usr_email }}</small>
+              </td>
+              <td>
+                <span class="badge px-2.5 py-1 rounded-pill small border"
+                      [ngClass]="{
+                        'bg-success bg-opacity-10 text-success border-success border-opacity-20': ev.sysev_action.includes('CREATED') || ev.sysev_action.includes('ADDED'),
+                        'bg-primary bg-opacity-10 text-primary border-primary border-opacity-20': ev.sysev_action.includes('UPDATED'),
+                        'bg-danger bg-opacity-10 text-danger border-danger border-opacity-20': ev.sysev_action.includes('DELETED')
+                      }">
+                  {{ ev.sysev_action }}
+                </span>
+              </td>
+              <td>
+                <span class="text-secondary small fw-bold">{{ ev.sysev_entitytype }}</span>
+                <code class="d-block text-muted font-monospace" style="font-size: 0.65rem;">{{ ev.sysev_entityuuid }}</code>
+              </td>
+              <td>
+                <span class="text-muted font-monospace small text-truncate d-block" 
+                      style="max-width: 250px; font-size: 0.72rem;" 
+                      title="{{ ev.sysev_details }}">
+                  {{ ev.sysev_details || 'N/A' }}
+                </span>
+              </td>
+              <td>
+                <span class="font-monospace text-dark small">{{ ev.sysev_ipaddress || '127.0.0.1' }}</span>
+                <small class="d-block text-muted text-truncate" style="max-width: 140px; font-size: 0.68rem;" title="{{ ev.sysev_useragent }}">{{ ev.sysev_useragent || 'N/A' }}</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <div *ngIf="!loadingAuditLogs && auditLogs.length > 0" class="table-responsive">
-      <table class="table table-hover align-middle mb-0 text-sm">
-        <thead class="bg-light text-muted font-monospace small" style="font-size: 0.75rem;">
-          <tr>
-            <th class="ps-4">FECHA Y HORA</th>
-            <th>USUARIO</th>
-            <th>ACCIÓN</th>
-            <th>DIRECCIÓN IP</th>
-            <th>DISPOSITIVO / NAV.</th>
-            <th>ESTADO / MOTIVO</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let log of auditLogs">
-            <td class="ps-4 font-monospace text-muted small">
-              {{ log.usraulo_createdat | date:'dd/MM/yyyy HH:mm:ss' }}
-            </td>
-            <td>
-              <span class="fw-semibold text-dark">{{ log.user?.usr_name || 'Desconocido' }} {{ log.user?.usr_surname || '' }}</span>
-              <small class="d-block text-muted" style="font-size: 0.7rem;">{{ log.user?.usr_email || log.usr_uuid }}</small>
-            </td>
-            <td>
-              <span class="badge px-2.5 py-1 rounded-pill small"
-                    [ngClass]="log.usraulo_action === 'LOGIN_SUCCESS' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20'">
-                {{ log.usraulo_action }}
-              </span>
-            </td>
-            <td class="font-monospace text-dark small">
-              {{ log.usraulo_ipaddress || '127.0.0.1' }}
-            </td>
-            <td class="text-muted small text-truncate" style="max-width: 200px;" title="{{ log.usraulo_useragent }}">
-              {{ log.usraulo_useragent || 'N/A' }}
-            </td>
-            <td>
-              <span *ngIf="log.usraulo_failurereason" class="text-danger small">{{ log.usraulo_failurereason }}</span>
-              <span *ngIf="!log.usraulo_failurereason" class="text-success small">OK</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
 
 </div>

@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService } from '../../core/services/users.service';
 import { UserAuthLogsService, UserAuthLogItem } from '../../core/services/user-auth-logs.service';
+import { SystemEventsService, SystemEventItem } from '../../core/services/system-events.service';
 import { SocketService } from '../../core/services/socket.service';
 import { Subscription } from 'rxjs';
 
@@ -30,12 +31,17 @@ export class AuditTabComponent implements OnInit, OnDestroy {
   public auditLogs: UserAuthLogItem[] = [];
   public loadingAuditLogs = false;
 
+  public activeLogsTab: 'auth' | 'system' = 'auth';
+  public systemEvents: SystemEventItem[] = [];
+  public loadingSystemEvents = false;
+
   private socketSubs: Subscription[] = [];
 
   constructor(
     public _authService: AuthService,
     private _usersService: UsersService,
     private _userAuthLogsService: UserAuthLogsService,
+    private _systemEventsService: SystemEventsService,
     private _socketService: SocketService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
@@ -45,6 +51,7 @@ export class AuditTabComponent implements OnInit, OnDestroy {
     this.initForm();
     this.loadUsers();
     this.loadAuditLogs();
+    this.loadSystemEvents();
     this.setupSocketListeners();
   }
 
@@ -112,6 +119,24 @@ export class AuditTabComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loadingAuditLogs = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  public loadSystemEvents(): void {
+    this.loadingSystemEvents = true;
+    this.cdr.detectChanges();
+    this._systemEventsService.getSystemEvents().subscribe({
+      next: (response: any) => {
+        this.loadingSystemEvents = false;
+        if (response.success && Array.isArray(response.data)) {
+          this.systemEvents = response.data;
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingSystemEvents = false;
         this.cdr.detectChanges();
       }
     });
