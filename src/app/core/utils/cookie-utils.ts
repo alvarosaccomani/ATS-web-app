@@ -1,10 +1,17 @@
-// Calcula el dominio wildcard dinámicamente (.ats.com) o retorna undefined si es localhost
+// Calcula el dominio wildcard dinámicamente (.atssuite.com.ar o .ats.com) o retorna undefined si es localhost
 export function getSharedDomain(): string | undefined {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return undefined; // En local no especificamos dominio para que lo asocie a localhost
   }
   const parts = hostname.split('.');
+  if (parts.length >= 3) {
+    const lastTwo = parts.slice(-2).join('.');
+    const doubleSuffixes = ['com.ar', 'net.ar', 'org.ar', 'gob.ar', 'co.uk', 'org.uk', 'com.br', 'net.br'];
+    if (doubleSuffixes.includes(lastTwo)) {
+      return '.' + parts.slice(-3).join('.');
+    }
+  }
   if (parts.length >= 2) {
     return '.' + parts.slice(-2).join('.');
   }
