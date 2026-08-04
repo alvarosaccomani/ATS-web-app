@@ -75,6 +75,22 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Paginación Directorio de Usuarios -->
+    <div *ngIf="!loadingUsers && usersList.length > 0" class="p-3 border-top border-light d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2" style="font-size: 0.8rem;">
+      <div class="text-muted">
+        Mostrando <span class="fw-semibold text-dark">{{ usersShowingFrom }}</span> a <span class="fw-semibold text-dark">{{ usersShowingTo }}</span> de <span class="fw-semibold text-dark">{{ usersTotal }}</span> registros
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button (click)="changeUsersPage(usersPage - 1)" [disabled]="usersPage === 1" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+          Anterior
+        </button>
+        <span class="text-muted small px-1 font-monospace">Página {{ usersPage }} de {{ usersTotalPages }}</span>
+        <button (click)="changeUsersPage(usersPage + 1)" [disabled]="usersPage === usersTotalPages" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+          Siguiente
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- VISTA 2: CONFIGURACIÓN DE CUENTA (FORMULARIO INLINE ESTILO CLOUDFLARE) -->
@@ -275,6 +291,22 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Paginación Logs de Seguridad -->
+      <div *ngIf="!loadingAuditLogs && auditLogs.length > 0" class="p-3 border-top border-light d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2" style="font-size: 0.8rem;">
+        <div class="text-muted">
+          Mostrando <span class="fw-semibold text-dark">{{ authLogsShowingFrom }}</span> a <span class="fw-semibold text-dark">{{ authLogsShowingTo }}</span> de <span class="fw-semibold text-dark">{{ authLogsTotal }}</span> registros
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button (click)="changeAuthPage(authLogsPage - 1)" [disabled]="authLogsPage === 1" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+            Anterior
+          </button>
+          <span class="text-muted small px-1 font-monospace">Página {{ authLogsPage }} de {{ authLogsTotalPages }}</span>
+          <button (click)="changeAuthPage(authLogsPage + 1)" [disabled]="authLogsPage === authLogsTotalPages" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- CONTENIDO TAB 2: BITÁCORA DE EVENTOS DE SISTEMA -->
@@ -344,6 +376,22 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Paginación Cambios del Sistema -->
+      <div *ngIf="!loadingSystemEvents && systemEvents.length > 0" class="p-3 border-top border-light d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2" style="font-size: 0.8rem;">
+        <div class="text-muted">
+          Mostrando <span class="fw-semibold text-dark">{{ systemEventsShowingFrom }}</span> a <span class="fw-semibold text-dark">{{ systemEventsShowingTo }}</span> de <span class="fw-semibold text-dark">{{ systemEventsTotal }}</span> registros
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button (click)="changeSystemPage(systemEventsPage - 1)" [disabled]="systemEventsPage === 1" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+            Anterior
+          </button>
+          <span class="text-muted small px-1 font-monospace">Página {{ systemEventsPage }} de {{ systemEventsTotalPages }}</span>
+          <button (click)="changeSystemPage(systemEventsPage + 1)" [disabled]="systemEventsPage === systemEventsTotalPages" class="btn btn-sm btn-light border px-2.5 py-1 fw-medium text-secondary">
+            Siguiente
+          </button>
+        </div>
       </div>
     </div>
 

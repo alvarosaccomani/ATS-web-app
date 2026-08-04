@@ -35,6 +35,28 @@ export class AuditTabComponent implements OnInit, OnDestroy {
   public systemEvents: SystemEventItem[] = [];
   public loadingSystemEvents = false;
 
+  // Variables de Paginación
+  public usersPage = 1;
+  public usersPerPage = 10;
+  public usersTotal = 0;
+  public usersTotalPages = 1;
+  public usersShowingFrom = 0;
+  public usersShowingTo = 0;
+
+  public authLogsPage = 1;
+  public authLogsPerPage = 10;
+  public authLogsTotal = 0;
+  public authLogsTotalPages = 1;
+  public authLogsShowingFrom = 0;
+  public authLogsShowingTo = 0;
+
+  public systemEventsPage = 1;
+  public systemEventsPerPage = 10;
+  public systemEventsTotal = 0;
+  public systemEventsTotalPages = 1;
+  public systemEventsShowingFrom = 0;
+  public systemEventsShowingTo = 0;
+
   private socketSubs: Subscription[] = [];
 
   constructor(
@@ -92,10 +114,14 @@ export class AuditTabComponent implements OnInit, OnDestroy {
     this.loadingUsers = true;
     this.errorMessage = '';
     this.cdr.detectChanges();
-    this._usersService.getUsers().subscribe({
+    this._usersService.getUsers('all', this.usersPage, this.usersPerPage).subscribe({
       next: (response: any) => {
         this.loadingUsers = false;
         this.usersList = response.data || [];
+        this.usersTotal = response.total || 0;
+        this.usersTotalPages = response.totalPages || 1;
+        this.usersShowingFrom = response.item || 0;
+        this.usersShowingTo = response.itemOf || 0;
         this.cdr.detectChanges();
       },
       error: (error: any) => {
@@ -109,11 +135,15 @@ export class AuditTabComponent implements OnInit, OnDestroy {
   public loadAuditLogs(): void {
     this.loadingAuditLogs = true;
     this.cdr.detectChanges();
-    this._userAuthLogsService.getUserAuthLogs().subscribe({
+    this._userAuthLogsService.getUserAuthLogs(this.authLogsPage, this.authLogsPerPage).subscribe({
       next: (response: any) => {
         this.loadingAuditLogs = false;
-        if (response.success && Array.isArray(response.data)) {
-          this.auditLogs = response.data;
+        if (response.success) {
+          this.auditLogs = response.data || [];
+          this.authLogsTotal = response.total || 0;
+          this.authLogsTotalPages = response.totalPages || 1;
+          this.authLogsShowingFrom = response.item || 0;
+          this.authLogsShowingTo = response.itemOf || 0;
         }
         this.cdr.detectChanges();
       },
@@ -127,11 +157,15 @@ export class AuditTabComponent implements OnInit, OnDestroy {
   public loadSystemEvents(): void {
     this.loadingSystemEvents = true;
     this.cdr.detectChanges();
-    this._systemEventsService.getSystemEvents().subscribe({
+    this._systemEventsService.getSystemEvents(this.systemEventsPage, this.systemEventsPerPage).subscribe({
       next: (response: any) => {
         this.loadingSystemEvents = false;
-        if (response.success && Array.isArray(response.data)) {
-          this.systemEvents = response.data;
+        if (response.success) {
+          this.systemEvents = response.data || [];
+          this.systemEventsTotal = response.total || 0;
+          this.systemEventsTotalPages = response.totalPages || 1;
+          this.systemEventsShowingFrom = response.item || 0;
+          this.systemEventsShowingTo = response.itemOf || 0;
         }
         this.cdr.detectChanges();
       },
@@ -140,6 +174,28 @@ export class AuditTabComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Métodos de cambio de página
+  public changeUsersPage(page: number): void {
+    if (page >= 1 && page <= this.usersTotalPages) {
+      this.usersPage = page;
+      this.loadUsers();
+    }
+  }
+
+  public changeAuthPage(page: number): void {
+    if (page >= 1 && page <= this.authLogsTotalPages) {
+      this.authLogsPage = page;
+      this.loadAuditLogs();
+    }
+  }
+
+  public changeSystemPage(page: number): void {
+    if (page >= 1 && page <= this.systemEventsTotalPages) {
+      this.systemEventsPage = page;
+      this.loadSystemEvents();
+    }
   }
 
   public formatDetailsShort(details: any): string {
