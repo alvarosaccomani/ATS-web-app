@@ -1,4 +1,31 @@
-import { Service } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-@Service()
-export class SystemEventsService {}
+export interface SystemEventItem {
+  sysev_uuid: string;
+  usr_uuid: string | null;
+  sysev_action: string;
+  sysev_entitytype: string;
+  sysev_entityuuid: string;
+  sysev_details: string | null;
+  sysev_ipaddress: string | null;
+  sysev_useragent: string | null;
+  sysev_createdat: string;
+  user?: any;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SystemEventsService {
+
+  constructor(
+    private http: HttpClient
+  ) { }
+
+  public getSystemEvents(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}system-events`);
+  }
+}
