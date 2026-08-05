@@ -1,1 +1,80 @@
-<p>support-widget works!</p>
+<div class="support-widget-container">
+    <!-- BOTÓN FLOTANTE TRIGGER -->
+    <button (click)="toggleWidget()" class="btn-trigger shadow-lg border-0 d-flex align-items-center justify-content-center" [class.active]="isOpen" title="Reportar un problema / Soporte">
+        <span *ngIf="!isOpen">💬</span>
+        <span *ngIf="isOpen">✕</span>
+    </button>
+
+    <!-- VENTANA FLOTANTE DEL FORMULARIO -->
+    <div *ngIf="isOpen" class="widget-card card border-0 shadow-lg rounded-4 overflow-hidden animate-slide-up">
+        <div class="card-header-custom p-3 bg-dark text-white d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+                <span>🎫</span>
+                <span class="fw-bold text-sm">Soporte y Sugerencias</span>
+            </div>
+            <small class="text-uppercase text-muted font-monospace" style="font-size: 0.65rem; color: #a0aec0 !important;">ATS Suite</small>
+        </div>
+
+        <div class="card-body p-3">
+            <!-- Éxito al enviar -->
+            <div *ngIf="isSuccess" class="text-center py-4 animate-fade-in">
+                <span class="display-4 d-block mb-2">✅</span>
+                <h6 class="fw-bold text-success mb-1">¡Reporte Enviado!</h6>
+                <p class="text-muted small mb-0 px-3">Tu ticket se registró con éxito. Álvaro lo revisará a la brevedad.</p>
+            </div>
+
+            <!-- Formulario -->
+            <form *ngIf="!isSuccess" [formGroup]="supportForm" (ngSubmit)="onSubmit()">
+            
+                <div *ngIf="errorMessage" class="alert alert-danger border-0 small p-2 rounded-3 mb-3 d-flex align-items-center gap-1.5">
+                    <span>⚠️</span> {{ errorMessage }}
+                </div>
+
+                <!-- Tipo de Reporte -->
+                <div class="mb-2">
+                    <label class="label-custom">TIPO DE REPORTE</label>
+                    <select formControlName="tic_type" class="form-select form-select-sm rounded-3 border-light shadow-none">
+                        <option value="BUG">🐛 Error / Bug</option>
+                        <option value="SUGGESTION">💡 Sugerencia de mejora</option>
+                        <option value="QUESTION">❓ Consulta técnica</option>
+                    </select>
+                </div>
+
+                <!-- Título -->
+                <div class="mb-2">
+                    <label class="label-custom">TÍTULO</label>
+                    <input type="text" formControlName="tic_title" placeholder="Ej: Error al exportar pdf" class="form-control form-control-sm rounded-3 border-light shadow-none">
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-2.5">
+                    <label class="label-custom">DESCRIPCIÓN</label>
+                    <textarea formControlName="tic_description" rows="3" placeholder="Describe brevemente qué sucedió o qué mejora propones..." class="form-control form-control-sm rounded-3 border-light shadow-none resize-none"></textarea>
+                </div>
+
+                <!-- Carga de capturas (Máximo 2) -->
+                <div class="mb-3">
+                    <label class="label-custom">CAPTURAS DE PANTALLA (MÁX. 2)</label>
+                    <input type="file" (change)="onFilesSelected($event)" multiple accept="image/*" class="form-control form-control-sm rounded-3 border-light shadow-none" style="font-size: 0.72rem;">
+              
+                    <!-- Miniaturas pre-visualización -->
+                    <div *ngIf="base64Images.length > 0" class="d-flex gap-2 mt-2">
+                        <div *ngFor="let img of base64Images; let i = index" class="position-relative border rounded-3 overflow-hidden" style="width: 48px; height: 48px;">
+                            <img [src]="img" class="w-100 h-100 object-fit-cover">
+                            <button type="button" (click)="removeImage(i)" class="btn-remove-img border-0 rounded-circle text-white d-flex align-items-center justify-content-center position-absolute top-0 end-0">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <button type="submit" [disabled]="supportForm.invalid || submitting" class="btn btn-primary btn-sm rounded-3 w-100 fw-semibold py-2 d-flex align-items-center justify-content-center gap-1.5">
+                    <span *ngIf="submitting" class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>🚀</span> Enviar Reporte
+                </button>
+
+          </form>
+        </div>
+    </div>
+</div>
