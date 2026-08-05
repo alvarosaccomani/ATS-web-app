@@ -2,6 +2,7 @@
 
 services:
   ats-web-app:
+    container_name: ats-web-app
     build:
       context: .
       dockerfile: Dockerfile
