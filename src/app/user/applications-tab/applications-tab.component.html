@@ -67,6 +67,9 @@
             </td>
             <td class="pe-4 text-end">
               <div class="d-inline-flex gap-2">
+                <button *ngIf="user.usr_sysadmin" (click)="openResponsiblesManager(app)" class="btn btn-light btn-xs border border-info-subtle text-info rounded-3 fw-semibold px-2.5 py-1 small" style="font-size: 0.75rem;">
+                  Soporte
+                </button>
                 <a [routerLink]="['/user/backoffice-suite/application-settings', app.app_uuid]" class="btn btn-light btn-xs border border-primary-subtle text-primary rounded-3 fw-semibold px-2.5 py-1 small text-decoration-none" style="font-size: 0.75rem;">
                   Ajustes
                 </a>
@@ -229,5 +232,89 @@
       </div>
 
     </form>
+  </div>
+
+  <!-- COLUMNA LATERAL GESTIÓN DE RESPONSABLES DE SOPORTE -->
+  <div *ngIf="selectedAppForResponsibles" class="position-fixed top-0 end-0 h-100 bg-white shadow-lg border-start animate-fade-in" style="width: 450px; z-index: 1050; padding: 2rem; overflow-y: auto; transition: transform 0.3s ease-in-out;">
+    
+    <!-- CABECERA -->
+    <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+      <div>
+        <h4 class="h6 fw-bold mb-1 text-dark">Soporte y Responsables</h4>
+        <small class="text-muted font-monospace small" style="font-size: 0.68rem;">{{ selectedAppForResponsibles.app_name }} ({{ selectedAppForResponsibles.app_cod }})</small>
+      </div>
+      <button (click)="closeResponsiblesManager()" class="btn-close shadow-none" style="font-size: 0.8rem;"></button>
+    </div>
+
+    <!-- ALERTAS -->
+    <div *ngIf="responsibleErrorMessage" class="alert alert-danger px-3 py-2 rounded-3 small mb-4">
+      ⚠️ {{ responsibleErrorMessage }}
+    </div>
+    <div *ngIf="responsibleSuccessMessage" class="alert alert-success px-3 py-2 rounded-3 small mb-4">
+      ✅ {{ responsibleSuccessMessage }}
+    </div>
+
+    <!-- ASIGNAR NUEVO RESPONSABLE (FORMULARIO) -->
+    <div class="card border rounded-3 p-3 bg-light bg-opacity-50 mb-4">
+      <h5 class="small fw-bold text-dark mb-3">Asignar Responsable de la App</h5>
+      
+      <form [formGroup]="responsibleForm" (ngSubmit)="assignResponsible()">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">USUARIO</label>
+          <select formControlName="usr_uuid" class="form-select rounded-3 border-light shadow-none text-sm" style="font-size: 0.85rem;">
+            <option value="" disabled selected>Seleccioná un usuario...</option>
+            <option *ngFor="let u of usersList" [value]="u.usr_uuid">
+              {{ u.usr_name }} {{ u.usr_surname }} ({{ u.usr_email }})
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">ROL / RESPONSABILIDAD</label>
+          <select formControlName="rol_uuid" class="form-select rounded-3 border-light shadow-none text-sm" style="font-size: 0.85rem;">
+            <option value="" disabled selected>Seleccioná un rol...</option>
+            <option *ngFor="let r of rolesList" [value]="r.rol_uuid">
+              {{ r.rol_name }}
+            </option>
+          </select>
+        </div>
+
+        <button type="submit" [disabled]="loadingResponsibleAction || responsibleForm.invalid" class="btn text-white w-100 py-2 rounded-3 fw-semibold small shadow-sm d-flex align-items-center justify-content-center gap-1.5" style="background-color: #0A2540;">
+          <span *ngIf="loadingResponsibleAction" class="spinner-border spinner-border-sm" role="status"></span>
+          Asignar Soporte
+        </button>
+      </form>
+    </div>
+
+    <!-- LISTADO DE RESPONSABLES ASIGNADOS -->
+    <div>
+      <h5 class="small fw-bold text-dark mb-3">Responsables Asignados</h5>
+      
+      <div *ngIf="loadingResponsibles" class="text-center py-4">
+        <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+      </div>
+
+      <div *ngIf="!loadingResponsibles && responsiblesList.length === 0" class="text-center py-4 text-muted small border border-dashed rounded-3">
+        No hay responsables asignados para esta aplicación.
+      </div>
+
+      <div *ngIf="!loadingResponsibles && responsiblesList.length > 0" class="d-flex flex-column gap-3">
+        <div *ngFor="let r of responsiblesList" class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-white">
+          <div class="d-flex align-items-center gap-2.5">
+            <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary fw-semibold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 0.8rem;">
+              {{ (r.user?.usr_name?.charAt(0) || '') + (r.user?.usr_surname?.charAt(0) || '') | uppercase }}
+            </div>
+            <div>
+              <span class="fw-semibold text-dark d-block text-sm" style="line-height: 1.25;">{{ r.user?.usr_name }} {{ r.user?.usr_surname }}</span>
+              <span class="text-muted d-block font-monospace" style="font-size: 0.68rem; line-height: 1.25;">{{ r.user?.usr_email }}</span>
+              <span class="badge bg-primary bg-opacity-10 text-primary small mt-1" style="font-size: 0.65rem; font-weight: 600;">{{ r.role?.rol_name }}</span>
+            </div>
+          </div>
+          <button (click)="removeResponsible(r.appres_uuid)" class="btn btn-link text-danger p-1 text-decoration-none shadow-none" title="Quitar Soporte">
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

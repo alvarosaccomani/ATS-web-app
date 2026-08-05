@@ -5,6 +5,9 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ApplicationsService } from '../../core/services/applications.service';
 import { TypeApplicationsService } from '../../core/services/type-applications.service';
+import { RolesService } from '../../core/services/roles.service';
+import { AppResponsiblesService } from '../../core/services/app-responsibles.service';
+import { UsersService } from '../../core/services/users.service';
 
 @Component({
   selector: 'app-applications-tab',
@@ -28,10 +31,24 @@ export class ApplicationsTabComponent implements OnInit {
   public errorMessage = '';
   public successMessage = '';
 
+  // Gestión de Responsables (Sysadmin Only)
+  public selectedAppForResponsibles: any | null = null;
+  public responsiblesList: any[] = [];
+  public loadingResponsibles = false;
+  public usersList: any[] = [];
+  public rolesList: any[] = [];
+  public responsibleForm!: FormGroup;
+  public loadingResponsibleAction = false;
+  public responsibleErrorMessage = '';
+  public responsibleSuccessMessage = '';
+
   constructor(
     public _authService: AuthService,
     private _applicationsService: ApplicationsService,
     private _typeApplicationsService: TypeApplicationsService,
+    private _rolesService: RolesService,
+    private _appResponsiblesService: AppResponsiblesService,
+    private _usersService: UsersService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {}
@@ -52,6 +69,11 @@ export class ApplicationsTabComponent implements OnInit {
       app_url: ['', [Validators.required]],
       app_hasaccess: [true],
       app_active: [true]
+    });
+
+    this.responsibleForm = this.fb.group({
+      usr_uuid: ['', [Validators.required]],
+      rol_uuid: ['', [Validators.required]]
     });
   }
 
@@ -177,6 +199,118 @@ export class ApplicationsTabComponent implements OnInit {
         },
         error: () => {
           this.errorMessage = 'No se pudo eliminar la aplicación seleccionada.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  // --- MÉTODOS GESTIÓN DE RESPONSABLES ---
+  public openResponsiblesManager(app: any): void {
+    this.selectedAppForResponsibles = app;
+    this.responsibleErrorMessage = '';
+    this.responsibleSuccessMessage = '';
+    this.responsibleForm.reset({
+      usr_uuid: '',
+      rol_uuid: ''
+    });
+    this.loadResponsiblesForApp(app.app_uuid);
+    this.loadUsersCatalog();
+    this.loadRolesCatalog();
+    this.cdr.detectChanges();
+  }
+
+  public closeResponsiblesManager(): void {
+    this.selectedAppForResponsibles = null;
+    this.cdr.detectChanges();
+  }
+
+  public loadResponsiblesForApp(app_uuid: string): void {
+    this.loadingResponsibles = true;
+    this.cdr.detectChanges();
+    this._appResponsiblesService.getResponsibles(app_uuid).subscribe({
+      next: (response: any) => {
+        this.responsiblesList = response.data || [];
+        this.loadingResponsibles = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.loadingResponsibles = false;
+        this.responsibleErrorMessage = 'Error al cargar los responsables.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  public loadUsersCatalog(): void {
+    if (this.usersList.length > 0) return;
+    this._usersService.getUsers().subscribe({
+      next: (response: any) => {
+        this.usersList = response.data?.rows || response.data || [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  public loadRolesCatalog(): void {
+    if (this.rolesList.length > 0) return;
+    this._rolesService.getRoles().subscribe({
+      next: (response: any) => {
+        this.rolesList = response.data || [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  public assignResponsible(): void {
+    this.responsibleErrorMessage = '';
+    this.responsibleSuccessMessage = '';
+
+    if (this.responsibleForm.invalid || !this.selectedAppForResponsibles) {
+      return;
+    }
+
+    this.loadingResponsibleAction = true;
+    this.cdr.detectChanges();
+
+    const { usr_uuid, rol_uuid } = this.responsibleForm.value;
+    const app_uuid = this.selectedAppForResponsibles.app_uuid;
+
+    this._appResponsiblesService.assignResponsible(app_uuid, usr_uuid, rol_uuid).subscribe({
+      next: (response: any) => {
+        this.loadingResponsibleAction = false;
+        this.responsibleSuccessMessage = 'Responsable asignado con éxito.';
+        this.loadResponsiblesForApp(app_uuid);
+        this.responsibleForm.reset({
+          usr_uuid: '',
+          rol_uuid: ''
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.loadingResponsibleAction = false;
+        this.responsibleErrorMessage = err.error?.message || 'Error al asignar el responsable.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  public removeResponsible(appres_uuid: string): void {
+    if (confirm('¿Estás seguro de que deseas quitar este responsable del soporte de la aplicación?')) {
+      this.loadingResponsibleAction = true;
+      this.cdr.detectChanges();
+      this._appResponsiblesService.removeResponsible(appres_uuid).subscribe({
+        next: () => {
+          this.loadingResponsibleAction = false;
+          this.responsibleSuccessMessage = 'Responsable desvinculado con éxito.';
+          if (this.selectedAppForResponsibles) {
+            this.loadResponsiblesForApp(this.selectedAppForResponsibles.app_uuid);
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          this.loadingResponsibleAction = false;
+          this.responsibleErrorMessage = err.error?.message || 'Error al quitar el responsable.';
           this.cdr.detectChanges();
         }
       });
