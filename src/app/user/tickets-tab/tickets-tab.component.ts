@@ -208,6 +208,17 @@ export class TicketsTabComponent implements OnInit, OnDestroy {
       tic_priority: ticket.tic_priority,
       tic_admincomment: ticket.tic_admincomment || ''
     });
+
+    // Cargar detalles para obtener historial de cambios
+    this._ticketsService.getTicketById(ticket.tic_uuid).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          this.selectedTicket = response.data;
+          this.cdr.detectChanges();
+        }
+      }
+    });
+
     this.cdr.detectChanges();
   }
 
@@ -231,8 +242,20 @@ export class TicketsTabComponent implements OnInit, OnDestroy {
         this.submitting = false;
         if (response.success) {
           this.successMessage = 'Ticket actualizado con éxito.';
-          // Recargar datos en la grilla principal
           this.loadTickets();
+          
+          // Recargar detalles actualizados para el timeline
+          this._ticketsService.getTicketById(this.selectedTicket.tic_uuid).subscribe({
+            next: (detailResp: any) => {
+              if (detailResp.success && detailResp.data) {
+                this.selectedTicket = detailResp.data;
+                this.ticketForm.patchValue({
+                  tic_admincomment: '' // Limpiar comentario cargado
+                });
+                this.cdr.detectChanges();
+              }
+            }
+          });
         } else {
           this.errorMessage = response.message || 'No se pudo actualizar el ticket.';
         }
