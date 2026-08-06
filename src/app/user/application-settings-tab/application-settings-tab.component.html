@@ -81,6 +81,10 @@
               <input *ngIf="setting.apps_datatype === 'number'" type="number" [(ngModel)]="setting.apps_value"
                      class="form-control px-3 py-2 rounded-3 text-sm" style="width: 140px; font-size: 0.8rem;" min="0">
 
+              <!-- Date -->
+              <input *ngIf="setting.apps_datatype === 'date'" type="date" [(ngModel)]="setting.apps_value"
+                     class="form-control px-3 py-2 rounded-3 text-sm" style="width: 200px; font-size: 0.8rem;">
+
               <!-- String (Text Input) -->
               <input *ngIf="setting.apps_datatype === 'string'" type="text" [(ngModel)]="setting.apps_value"
                      class="form-control px-3 py-2 rounded-3 text-sm" style="width: 280px; font-size: 0.8rem;" placeholder="Completar valor...">

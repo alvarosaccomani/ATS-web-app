@@ -178,6 +178,45 @@ export class ApplicationSettingsTabComponent implements OnInit {
         apps_options: '',
         apps_updatedat: new Date(),
         apps_createdat: new Date()
+      },
+      {
+        app_uuid: this.app_uuid,
+        apps_uuid: '5',
+        apps_key: 'app_port',
+        apps_parameter: 'Puerto de la Aplicación',
+        apps_description: 'Puerto local o de contenedor donde escucha el servicio (ej: 80, 3000, 8080).',
+        apps_datatype: 'number',
+        apps_value: '80',
+        apps_group: 'Infraestructura y Red',
+        apps_options: '',
+        apps_updatedat: new Date(),
+        apps_createdat: new Date()
+      },
+      {
+        app_uuid: this.app_uuid,
+        apps_uuid: '6',
+        apps_key: 'app_domain',
+        apps_parameter: 'Dominio o URL de Acceso',
+        apps_description: 'Dirección o dominio público configurado para acceder a la aplicación.',
+        apps_datatype: 'string',
+        apps_value: '',
+        apps_group: 'Infraestructura y Red',
+        apps_options: '',
+        apps_updatedat: new Date(),
+        apps_createdat: new Date()
+      },
+      {
+        app_uuid: this.app_uuid,
+        apps_uuid: '7',
+        apps_key: 'app_domain_expiration',
+        apps_parameter: 'Vencimiento del Dominio',
+        apps_description: 'Fecha límite de expiración del dominio configurado.',
+        apps_datatype: 'date',
+        apps_value: '',
+        apps_group: 'Infraestructura y Red',
+        apps_options: '',
+        apps_updatedat: new Date(),
+        apps_createdat: new Date()
       }
     ];
   }
