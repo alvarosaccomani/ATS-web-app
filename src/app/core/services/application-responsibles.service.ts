@@ -6,21 +6,18 @@ import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class AppResponsiblesService {
+export class ApplicationResponsiblesService {
+  constructor(private http: HttpClient) {}
 
-  constructor(
-    private http: HttpClient
-  ) { }
-  
   public getResponsibles(app_uuid: string): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}app-responsibles/${app_uuid}`);
+    return this.http.get<any>(`${environment.apiUrl}application/${app_uuid}/responsibles`);
   }
 
   public assignResponsible(app_uuid: string, usr_uuid: string, rol_uuid: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}app-responsible/${app_uuid}`, { usr_uuid, rol_uuid });
+    return this.http.post<any>(`${environment.apiUrl}application/${app_uuid}/responsibles`, { usr_uuid, rol_uuid });
   }
 
   public removeResponsible(appres_uuid: string): Observable<any> {
-    return this.http.delete<any>(`${environment.apiUrl}app-responsible/${appres_uuid}`);
+    return this.http.delete<any>(`${environment.apiUrl}application/responsibles/${appres_uuid}`);
   }
 }

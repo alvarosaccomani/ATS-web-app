@@ -6,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApplicationsService } from '../../core/services/applications.service';
 import { TypeApplicationsService } from '../../core/services/type-applications.service';
 import { RolesService } from '../../core/services/roles.service';
-import { AppResponsiblesService } from '../../core/services/app-responsibles.service';
+import { ApplicationResponsiblesService } from '../../core/services/application-responsibles.service';
 import { UsersService } from '../../core/services/users.service';
 
 @Component({
@@ -47,7 +47,7 @@ export class ApplicationsTabComponent implements OnInit {
     private _applicationsService: ApplicationsService,
     private _typeApplicationsService: TypeApplicationsService,
     private _rolesService: RolesService,
-    private _appResponsiblesService: AppResponsiblesService,
+    private _appResponsiblesService: ApplicationResponsiblesService,
     private _usersService: UsersService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
