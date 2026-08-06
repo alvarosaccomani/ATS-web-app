@@ -1,1 +1,313 @@
-<p>application-maintenance-tab works!</p>
+<div class="animate-fade-in container-fluid p-4">
+  
+  <!-- CABECERA -->
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <button (click)="goBack()" class="btn btn-light btn-sm border rounded-3 text-secondary px-2.5 py-1 text-xs fw-semibold">
+          &larr; Volver
+        </button>
+        <span class="text-muted small">/</span>
+        <h2 class="h5 fw-bold mb-0 text-dark">📋 Bitácora Operativa</h2>
+      </div>
+      <h3 class="h4 fw-extrabold text-dark mt-2 mb-1">{{ appName }}</h3>
+      <div class="d-flex gap-3 small text-muted">
+        <span><strong>Cód:</strong> <code class="small text-secondary">{{ appCod }}</code></span>
+        <span>•</span>
+        <span><strong>Base de Datos:</strong> <code class="small text-secondary">{{ appDbName }}</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTAS -->
+  <div *ngIf="successMessage" class="alert alert-success d-flex align-items-center gap-2 border-0 rounded-3 p-3 text-sm mb-4">
+    <span>✅</span> {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center gap-2 border-0 rounded-3 p-3 text-sm mb-4">
+    <span>⚠️</span> {{ errorMessage }}
+  </div>
+
+  <!-- NAVEGACIÓN DE TABs -->
+  <ul class="nav nav-tabs border-bottom mb-4" style="cursor: pointer;">
+    <li class="nav-item">
+      <a class="nav-link text-sm fw-semibold" [class.active]="activeTab === 'updates'" (click)="changeTab('updates')" [style.color]="activeTab === 'updates' ? '#0A2540' : '#64748b'">
+        ⚙️ Actualizaciones / Versiones
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-sm fw-semibold" [class.active]="activeTab === 'backups'" (click)="changeTab('backups')" [style.color]="activeTab === 'backups' ? '#0A2540' : '#64748b'">
+        💾 Copias de Seguridad (Backups)
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-sm fw-semibold" [class.active]="activeTab === 'maintenances'" (click)="changeTab('maintenances')" [style.color]="activeTab === 'maintenances' ? '#0A2540' : '#64748b'">
+        🔧 Tareas Técnicas / Mantenimiento
+      </a>
+    </li>
+  </ul>
+
+  <!-- -------------------- TAB 1: ACTUALIZACIONES -------------------- -->
+  <div *ngIf="activeTab === 'updates'" class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="h6 fw-bold mb-0 text-dark">Historial de Despliegues</h4>
+      <button *ngIf="!showUpdateForm" (click)="showUpdateForm = true" class="btn btn-sm text-white px-3 py-1.5 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+        ＋ Registrar Versión
+      </button>
+    </div>
+
+    <!-- FORMULARIO ACTUALIZACIÓN -->
+    <div *ngIf="showUpdateForm" class="card border rounded-4 p-4 bg-light bg-opacity-25 mb-4 animate-fade-in">
+      <h5 class="small fw-bold text-dark mb-3">Registrar Nueva Versión de la Aplicación</h5>
+      <form [formGroup]="updateForm" (ngSubmit)="submitUpdate()">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">VERSIÓN</label>
+            <input type="text" formControlName="appup_version" class="form-control rounded-3 text-sm" placeholder="ej: v1.0.4" />
+          </div>
+          <div class="col-md-9">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">NOTAS DE CAMBIO (RELEASE NOTES)</label>
+            <textarea formControlName="appup_description" rows="2" class="form-control rounded-3 text-sm" placeholder="Describe brevemente las mejoras implementadas..."></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2.5 justify-content-end mt-3">
+          <button type="button" (click)="showUpdateForm = false" class="btn btn-sm btn-light border px-3 rounded-3 text-xs fw-semibold">Cancelar</button>
+          <button type="submit" [disabled]="updateForm.invalid || isSubmitting" class="btn btn-sm text-white px-3 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Registrar Despliegue
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLA ACTUALIZACIONES -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div *ngIf="isLoadingData" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      </div>
+      <div *ngIf="!isLoadingData && updatesList.length === 0" class="p-5 text-center text-muted small border border-dashed rounded-4 m-3 bg-light bg-opacity-25">
+        No se han registrado actualizaciones para esta aplicación.
+      </div>
+      <div *ngIf="!isLoadingData && updatesList.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.72rem;">
+            <tr>
+              <th class="ps-4">VERSIÓN</th>
+              <th>CAMBIOS / NOTAS</th>
+              <th>DESPLEGADO POR</th>
+              <th class="pe-4 text-end">FECHA Y HORA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of updatesList">
+              <td class="ps-4 font-monospace fw-bold text-primary">{{ u.appup_version }}</td>
+              <td>
+                <div class="text-dark fw-medium text-sm" style="white-space: pre-line; line-height: 1.45;">{{ u.appup_description }}</div>
+              </td>
+              <td>
+                <span class="fw-semibold text-secondary">{{ u.user ? u.user.usr_name + ' ' + u.user.usr_surname : 'Sistema' }}</span>
+                <small class="text-muted d-block" style="font-size: 0.7rem;">{{ u.user?.usr_email }}</small>
+              </td>
+              <td class="pe-4 text-end font-monospace text-muted small">{{ u.appup_createdat | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- -------------------- TAB 2: BACKUPS -------------------- -->
+  <div *ngIf="activeTab === 'backups'" class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="h6 fw-bold mb-0 text-dark">Copias de Seguridad Realizadas</h4>
+      <button *ngIf="!showBackupForm" (click)="showBackupForm = true" class="btn btn-sm text-white px-3 py-1.5 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+        ＋ Registrar Backup Manual
+      </button>
+    </div>
+
+    <!-- FORMULARIO BACKUP -->
+    <div *ngIf="showBackupForm" class="card border rounded-4 p-4 bg-light bg-opacity-25 mb-4 animate-fade-in">
+      <h5 class="small fw-bold text-dark mb-3">Registrar Nueva Copia de Seguridad</h5>
+      <form [formGroup]="backupForm" (ngSubmit)="submitBackup()">
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">NOMBRE DEL ARCHIVO</label>
+            <input type="text" formControlName="appbak_filename" class="form-control rounded-3 text-sm font-monospace" placeholder="ej: guva_db_2026-08-06.sql" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">TAMAÑO EN BYTES</label>
+            <input type="number" formControlName="appbak_size" class="form-control rounded-3 text-sm" placeholder="ej: 1048576" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">ESTADO</label>
+            <select formControlName="appbak_status" class="form-select rounded-3 text-sm">
+              <option value="SUCCESS">Exitoso (SUCCESS)</option>
+              <option value="FAILED">Fallido (FAILED)</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">RUTA / BUCKET DE ALMACENAMIENTO</label>
+            <input type="text" formControlName="appbak_storagepath" class="form-control rounded-3 text-sm font-monospace" placeholder="ej: s3://ats-backups/central/guva_db_2026-08-06.sql" />
+          </div>
+        </div>
+        <div class="d-flex gap-2.5 justify-content-end mt-3">
+          <button type="button" (click)="showBackupForm = false" class="btn btn-sm btn-light border px-3 rounded-3 text-xs fw-semibold">Cancelar</button>
+          <button type="submit" [disabled]="backupForm.invalid || isSubmitting" class="btn btn-sm text-white px-3 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Registrar Backup
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLA BACKUPS -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div *ngIf="isLoadingData" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      </div>
+      <div *ngIf="!isLoadingData && backupsList.length === 0" class="p-5 text-center text-muted small border border-dashed rounded-4 m-3 bg-light bg-opacity-25">
+        No se han registrado backups para esta aplicación.
+      </div>
+      <div *ngIf="!isLoadingData && backupsList.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.72rem;">
+            <tr>
+              <th class="ps-4">ARCHIVO</th>
+              <th>TAMAÑO</th>
+              <th>RUTA DE ALMACENAMIENTO</th>
+              <th>ESTADO</th>
+              <th>OPERADOR</th>
+              <th class="pe-4 text-end">FECHA Y HORA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of backupsList">
+              <td class="ps-4 font-monospace fw-bold text-dark">{{ b.appbak_filename }}</td>
+              <td class="font-monospace text-secondary small">{{ formatBytes(b.appbak_size) }}</td>
+              <td>
+                <code class="small text-muted text-truncate d-inline-block" style="max-width: 250px;" title="{{ b.appbak_storagepath }}">{{ b.appbak_storagepath }}</code>
+              </td>
+              <td>
+                <span class="badge rounded-pill px-2.5 py-1 small"
+                      [ngClass]="b.appbak_status === 'SUCCESS' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-20' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20'">
+                  {{ b.appbak_status }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-semibold text-secondary">{{ b.user ? b.user.usr_name + ' ' + b.user.usr_surname : 'Cron Tarea' }}</span>
+              </td>
+              <td class="pe-4 text-end font-monospace text-muted small">{{ b.appbak_createdat | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- -------------------- TAB 3: TAREAS TÉCNICAS -------------------- -->
+  <div *ngIf="activeTab === 'maintenances'" class="animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="h6 fw-bold mb-0 text-dark">Logs de Tareas Técnicas</h4>
+      <button *ngIf="!showMaintForm" (click)="showMaintForm = true" class="btn btn-sm text-white px-3 py-1.5 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+        ＋ Registrar Tarea
+      </button>
+    </div>
+
+    <!-- FORMULARIO TAREA TÉCNICA -->
+    <div *ngIf="showMaintForm" class="card border rounded-4 p-4 bg-light bg-opacity-25 mb-4 animate-fade-in">
+      <h5 class="small fw-bold text-dark mb-3">Registrar Evento de Mantenimiento</h5>
+      <form [formGroup]="maintForm" (ngSubmit)="submitMaint()">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">TIPO DE TAREA</label>
+            <select formControlName="appmaint_type" class="form-select rounded-3 text-sm">
+              <option value="DB_INDEX_REBUILD">Reindexación BD (DB_INDEX_REBUILD)</option>
+              <option value="SERVER_REBOOT">Reinicio de Servidor (SERVER_REBOOT)</option>
+              <option value="CONFIG_EDIT">Edición de Configuración (CONFIG_EDIT)</option>
+              <option value="PATCH_APPLIED">Parche Aplicado (PATCH_APPLIED)</option>
+              <option value="OTHER">Otro Mantenimiento (OTHER)</option>
+            </select>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">TÍTULO</label>
+            <input type="text" formControlName="appmaint_title" class="form-control rounded-3 text-sm" placeholder="ej: Reindexado de tablas de ticket log" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">RESULTADO</label>
+            <select formControlName="appmaint_status" class="form-select rounded-3 text-sm">
+              <option value="SUCCESS">Éxito (SUCCESS)</option>
+              <option value="WARNING">Advertencia (WARNING)</option>
+              <option value="FAILED">Error (FAILED)</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted small fw-bold" style="font-size: 0.68rem;">DETALLE O DESCRIPCIÓN TÉCNICA</label>
+            <textarea formControlName="appmaint_description" rows="2" class="form-control rounded-3 text-sm" placeholder="Describe técnicamente lo realizado y sus repercusiones..."></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2.5 justify-content-end mt-3">
+          <button type="button" (click)="showMaintForm = false" class="btn btn-sm btn-light border px-3 rounded-3 text-xs fw-semibold">Cancelar</button>
+          <button type="submit" [disabled]="maintForm.invalid || isSubmitting" class="btn btn-sm text-white px-3 rounded-3 fw-semibold text-xs" style="background-color: #0A2540;">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Registrar Mantenimiento
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TABLA TAREAS TÉCNICAS -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div *ngIf="isLoadingData" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      </div>
+      <div *ngIf="!isLoadingData && maintenancesList.length === 0" class="p-5 text-center text-muted small border border-dashed rounded-4 m-3 bg-light bg-opacity-25">
+        No hay tareas técnicas registradas en la bitácora.
+      </div>
+      <div *ngIf="!isLoadingData && maintenancesList.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-sm">
+          <thead class="bg-light text-muted font-monospace small" style="font-size: 0.72rem;">
+            <tr>
+              <th class="ps-4">TIPO TAREA</th>
+              <th>TÍTULO / DETALLE</th>
+              <th>RESULTADO</th>
+              <th>ADMINISTRADOR</th>
+              <th class="pe-4 text-end">FECHA Y HORA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of maintenancesList">
+              <td class="ps-4">
+                <code class="small text-dark fw-bold bg-light px-2 py-1 rounded">{{ m.appmaint_type }}</code>
+              </td>
+              <td>
+                <div class="fw-bold text-dark text-sm mb-0.5">{{ m.appmaint_title }}</div>
+                <small class="text-muted d-block" style="white-space: pre-wrap; font-size: 0.75rem;">{{ m.appmaint_description }}</small>
+              </td>
+              <td>
+                <span class="badge rounded-pill px-2.5 py-1 small"
+                      [style.background-color]="
+                        m.appmaint_status === 'SUCCESS' ? 'rgba(25, 135, 84, 0.12)' :
+                        m.appmaint_status === 'WARNING' ? 'rgba(255, 193, 7, 0.12)' :
+                        'rgba(220, 53, 69, 0.12)'"
+                      [style.color]="
+                        m.appmaint_status === 'SUCCESS' ? '#198754' :
+                        m.appmaint_status === 'WARNING' ? '#b27b00' :
+                        '#dc3545'"
+                      [style.border-color]="
+                        m.appmaint_status === 'SUCCESS' ? 'rgba(25, 135, 84, 0.2)' :
+                        m.appmaint_status === 'WARNING' ? 'rgba(255, 193, 7, 0.2)' :
+                        'rgba(220, 53, 69, 0.2)'">
+                  {{ m.appmaint_status }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-semibold text-secondary">{{ m.user ? m.user.usr_name + ' ' + m.user.usr_surname : 'Sistema' }}</span>
+              </td>
+              <td class="pe-4 text-end font-monospace text-muted small">{{ m.appmaint_createdat | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
