@@ -9,6 +9,7 @@ import { SubscriptionsTabComponent } from './subscriptions-tab/subscriptions-tab
 import { ApplicationsTabComponent } from './applications-tab/applications-tab.component';
 import { TicketsTabComponent } from './tickets-tab/tickets-tab.component';
 import { ApplicationSettingsTabComponent } from './application-settings-tab/application-settings-tab.component';
+import { ApplicationMaintenanceTabComponent } from './application-maintenance-tab/application-maintenance-tab.component';
 
 export const USER_ROUTES: Routes = [
     {
@@ -26,7 +27,8 @@ export const USER_ROUTES: Routes = [
                     { path: 'subscriptions', component: SubscriptionsTabComponent },
                     { path: 'applications', component: ApplicationsTabComponent },
                     { path: 'tickets', component: TicketsTabComponent },
-                    { path: 'application-settings/:app_uuid', component: ApplicationSettingsTabComponent }
+                    { path: 'application-settings/:app_uuid', component: ApplicationSettingsTabComponent },
+                    { path: 'application-maintenance/:app_uuid', component: ApplicationMaintenanceTabComponent }
                 ]
             }
         ]
